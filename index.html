@@ -1,0 +1,685 @@
+<title>Curso de Astronomía</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="katex.min.css">
+<style>
+/* Layout: cabecera fija con progreso, mapa del curso a la izquierda y una lección por pasos a la derecha. */
+:root {
+  --bg: #f1f3f8; --surface: #ffffff; --sunken: #e7eaf2;
+  --ink: #141a2e; --muted: #566079; --line: #d5dae6;
+  --accent: #2c47c9; --accent-ink: #ffffff; --accent-soft: #e3e8fb;
+  --star: #a86a10; --star-soft: #fbf0d9;
+  --ok: #1c7548; --ok-soft: #e0f3e8; --bad: #b0352c; --bad-soft: #fbe6e3;
+  --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1020; --surface: #131a31; --sunken: #0f1529;
+  --ink: #e9ecf6; --muted: #9ba5c1; --line: #28314f;
+  --accent: #93a6ff; --accent-ink: #0b1020; --accent-soft: #1d2750;
+  --star: #f0b84a; --star-soft: #2c2412;
+  --ok: #62d09a; --ok-soft: #12301f; --bad: #f28d83; --bad-soft: #3a1815;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1020; --surface: #131a31; --sunken: #0f1529;
+  --ink: #e9ecf6; --muted: #9ba5c1; --line: #28314f;
+  --accent: #93a6ff; --accent-ink: #0b1020; --accent-soft: #1d2750;
+  --star: #f0b84a; --star-soft: #2c2412;
+  --ok: #62d09a; --ok-soft: #12301f; --bad: #f28d83; --bad-soft: #3a1815;
+  color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface) }
+a { color: var(--accent) }
+button { font: inherit; cursor: pointer }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0 }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line) }
+.top-in { max-width: 1180px; margin: 0 auto; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: 14px; flex-wrap: wrap }
+.brand { font-family: var(--display); font-weight: 700; font-size: 1.1rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px }
+.brand svg { flex: none }
+.cursos { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--sunken) }
+.cursos a { font: 500 .8rem var(--body); color: var(--muted); text-decoration: none; padding: 5px 12px; border-radius: 999px; white-space: nowrap }
+.cursos a[aria-current="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12) }
+.meter { flex: 1 1 160px; min-width: 120px; display: flex; align-items: center; gap: 10px; font: 500 .78rem var(--mono); color: var(--muted) }
+.bar { flex: 1; height: 6px; background: var(--sunken); border-radius: 3px; overflow: hidden }
+.bar i { display: block; height: 100%; background: var(--star); border-radius: 3px; transition: width .3s }
+.sync { font: .75rem var(--mono); color: var(--muted) }
+.map-btn { display: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 6px 12px; font-size: .9rem }
+
+.shell { max-width: 1180px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 36px; align-items: start }
+nav.map { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); max-height: calc(100vh - 96px); overflow: auto; display: flex; flex-direction: column; gap: 18px; padding-right: 4px }
+.fase-t { font: 500 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px }
+.fase ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px }
+.fase a, .fase .prox { display: flex; gap: 10px; align-items: baseline; padding: 7px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: .93rem; line-height: 1.3 }
+.fase a:hover { background: var(--sunken) }
+.fase a[aria-current="page"] { background: var(--accent-soft); font-weight: 600 }
+.fase .prox { color: var(--muted) }
+.dot { flex: none; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--muted); transform: translateY(-1px) }
+.dot.part { border-color: var(--star); background: linear-gradient(90deg, var(--star) 50%, transparent 50%) }
+.dot.done { border-color: var(--star); background: var(--star) }
+.prox .dot { border-style: dotted }
+
+main { min-width: 0; max-width: 760px }
+.eyebrow { font: 500 .75rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--star) }
+.h-title { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 700; margin: 6px 0 8px }
+.h-sub { color: var(--muted); margin: 0; max-width: 60ch }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px }
+
+/* Inicio */
+.next { display: flex; gap: 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 24px 0 }
+.next h2 { font-size: 1.25rem; margin: 4px 0 }
+.next p { margin: 0; color: var(--muted); font-size: .95rem }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 8px; padding: 10px 18px; background: var(--accent); color: var(--accent-ink); font-weight: 600; text-decoration: none }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line) }
+.btn:disabled { opacity: .5; cursor: default }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 30px }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px }
+.stat b { display: block; font: 500 1.5rem var(--mono); font-variant-numeric: tabular-nums }
+.stat span { font-size: .85rem; color: var(--muted) }
+.ruta { display: flex; flex-direction: column; margin-top: 14px }
+.ruta-f { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 14px; padding-bottom: 22px; position: relative }
+.ruta-f::before { content: ""; position: absolute; left: 14px; top: 30px; bottom: 0; width: 2px; background: var(--line) }
+.ruta-f:last-child::before { display: none }
+.ruta-n { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; font: 500 .85rem var(--mono); color: var(--muted) }
+.ruta-f.on .ruta-n { border-color: var(--star); color: var(--star) }
+.ruta-f h3 { font-size: 1.05rem; margin-top: 3px }
+.ruta-f .meta { font: .75rem var(--mono); color: var(--muted) }
+.ruta-f p { margin: 4px 0 0; color: var(--muted); font-size: .93rem }
+
+/* Lección */
+.steps { display: flex; gap: 6px; overflow-x: auto; margin: 22px 0 20px; padding-bottom: 4px }
+.steps button { flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 6px 14px; font-size: .9rem }
+.steps button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600 }
+.sec h3 { font-size: 1.15rem; margin: 30px 0 8px }
+.sec h3:first-child { margin-top: 0 }
+.sec p, .sec li { max-width: 68ch }
+.sec p { margin: 0 0 14px }
+.lead { font-size: 1.15rem; line-height: 1.5 }
+.nota { background: var(--star-soft); border-radius: var(--r); padding: 14px 16px; margin: 0 0 16px; font-size: .96rem }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 6px 0; margin: 12px 0 16px }
+math[display="block"] { overflow-x: auto; margin: 12px 0 16px; font-size: 1.1em }
+.tabla { overflow-x: auto; margin: 0 0 16px }
+pre { font: .88rem/1.55 var(--mono); background: var(--sunken); padding: 14px 16px; border-radius: 8px; margin: 0; overflow-x: auto; white-space: pre }
+code { font-family: var(--mono); font-size: .92em }
+table { border-collapse: collapse; width: 100%; font-size: .95rem }
+th { text-align: left; font: 500 .72rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line) }
+td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums }
+.pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); flex-wrap: wrap }
+
+/* Ejercicios */
+.ej { margin-bottom: 20px; padding: 0; overflow: hidden }
+.ej-h { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap }
+.ej-h h3 { margin: 0; font-size: 1.05rem; flex: 1 }
+.nivel { font: 500 .7rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.nivel b { color: var(--star); letter-spacing: 2px }
+.ej-b { padding: 16px 20px 6px }
+.ej-b > p { margin: 0 0 12px }
+.parte { padding: 14px 0; border-top: 1px dashed var(--line) }
+.preg { display: flex; gap: 10px; margin-bottom: 10px }
+.preg .l { font: 500 .85rem var(--mono); color: var(--muted); flex: none; padding-top: 2px }
+.resp { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.resp input[type="text"] { font: 1rem var(--mono); padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); width: 8.5em }
+.resp input.expo { width: 3.6em; font-size: .85rem; padding: 4px 6px; transform: translateY(-9px) }
+.resp .x10 { font: 1rem var(--mono); color: var(--muted) }
+.resp .u { color: var(--muted); font-size: .95rem; margin-right: 6px }
+.ops { display: flex; flex-direction: column; gap: 6px; width: 100% }
+.ops label { display: flex; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font-size: .96rem; line-height: 1.4 }
+.ops label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft) }
+.ops input { margin-top: 4px; flex: none }
+.fb { margin-top: 10px; padding: 10px 14px; border-radius: 8px; font-size: .95rem }
+.fb.ok { background: var(--ok-soft); color: var(--ok) }
+.fb.no { background: var(--bad-soft); color: var(--bad) }
+.fb.info { background: var(--sunken); color: var(--ink) }
+.acc { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px }
+.link { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; font-size: .92rem }
+.sol { margin-top: 10px; padding: 12px 14px; border-left: 3px solid var(--star); background: var(--sunken); border-radius: 0 8px 8px 0; font-size: .96rem; overflow-x: auto }
+.opc { font: 500 .68rem var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; margin-left: 6px }
+
+/* Práctica */
+.campo { display: flex; flex-direction: column; gap: 6px; margin: 16px 0 }
+.campo label { font-weight: 600; font-size: .95rem }
+textarea { font: 1rem/1.5 var(--body); padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); min-height: 96px; resize: vertical; width: 100% }
+.tareas { list-style: none; padding: 0; margin: 0 0 8px; display: flex; flex-direction: column; gap: 4px }
+.tareas label { display: flex; gap: 10px; padding: 8px 0; cursor: pointer }
+.tareas input { width: 18px; height: 18px; margin-top: 4px; flex: none; accent-color: var(--star) }
+.tareas input:checked + span { color: var(--muted); text-decoration: line-through }
+.puntos { padding-left: 20px; display: flex; flex-direction: column; gap: 10px }
+
+/* Widgets */
+.w { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; margin: 4px 0 18px }
+.w input[type="range"] { width: 100%; accent-color: var(--star); margin: 10px 0 2px }
+.w-big { font: 500 clamp(1.5rem, 5vw, 2.1rem) var(--mono); font-variant-numeric: tabular-nums }
+.w-big sup { font-size: .55em }
+.w-txt { margin: 4px 0 0; min-height: 3.2em }
+.w-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 10px }
+.w-row div { font-size: .82rem; color: var(--muted) }
+.w-row b { display: block; font: 500 1.1rem var(--mono); color: var(--ink); font-variant-numeric: tabular-nums }
+.w-cap { font: .75rem var(--mono); color: var(--muted); display: flex; justify-content: space-between }
+.w svg { width: 100%; height: auto; display: block; margin-top: 8px }
+
+/* Tutor */
+.tutor { margin-top: 36px }
+.tutor h3 { font-size: 1.05rem; margin-bottom: 4px }
+.tutor p.h { margin: 0 0 12px; color: var(--muted); font-size: .92rem }
+.tutor form { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap }
+.tutor textarea { min-height: 52px; flex: 1 1 260px }
+.chat { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px }
+.msg { padding: 10px 14px; border-radius: 10px; font-size: .96rem; max-width: 100%; overflow-x: auto }
+.msg.u { background: var(--accent-soft); align-self: flex-end }
+.msg.t { background: var(--sunken) }
+.msg p { margin: 0 0 8px } .msg p:last-child { margin: 0 }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 0 }
+  nav.map { position: static; max-height: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin-bottom: 20px }
+  nav.map:not(.open) { display: none }
+  .map-btn { display: inline-block }
+  .sync { display: none }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+</style>
+
+<header class="top"><div class="top-in">
+  <a class="brand" id="brand" href="#inicio">
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9.5" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".45"/><ellipse cx="11" cy="11" rx="9.5" ry="3.6" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".45"/><circle cx="15.5" cy="6.5" r="2.2" style="fill:var(--star)"/></svg>
+    <span id="brandT">Curso de Astronomía</span>
+  </a>
+  <nav class="cursos" id="cursos" aria-label="Cursos"><a href="#inicio" data-c="astro">Astronomía</a><a href="#az-inicio" data-c="az">Azure AZ-104</a></nav>
+  <div class="meter" title="Apartados resueltos sobre el total disponible"><div class="bar"><i id="gbar" style="width:0%"></i></div><span id="gtxt">0 %</span></div>
+  <span class="sync" id="sync">Guardado en este navegador</span>
+  <button class="map-btn" id="mapBtn" type="button" aria-expanded="false" aria-controls="mapa">Mapa del curso</button>
+</div></header>
+
+<div class="shell">
+  <nav class="map" id="mapa" aria-label="Mapa del curso"></nav>
+  <main id="main"></main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script src="lecciones.js"></script>
+<script src="az104.js"></script>
+<script src="fig-paralaje.js"></script>
+<script src="fig-telescopio.js"></script>
+<script>
+(function () {
+  "use strict";
+  var COURSES = { astro: window.CURSO, az: window.AZ104 || null }, CK = "astro", C = COURSES.astro, LS = "curso-astro-v1";
+  var STR = {
+    es: { fase: "Fase", leccion: "Lección", tiempo: "Tiempo estimado", mapa: "Mapa del curso", continua: "Continúa donde lo dejaste", empieza: "Empieza aquí", continuar: "Continuar", empezar: "Empezar",
+      alDia: "Al día", finTodo: "Has terminado las lecciones disponibles", finTodoP: "Pide las siguientes en el chat del proyecto.", lecHechas: "lecciones terminadas", apResueltos: "apartados resueltos", ruta: "La ruta completa",
+      ejIntro: "Escribe tu resultado y pulsa Comprobar. Si fallas, recibirás una indicación de dónde puede estar el error. La solución completa se desbloquea cuando aciertas o tras tres intentos.",
+      notaPh: "Escribe aquí. Se guarda solo.", hecha: "Lección terminada.", sigueCon: "Sigue con la", ultima: "Es la última disponible por ahora. Pide las siguientes en el chat del proyecto.", pendiente: "Marcar como pendiente",
+      quedan: function (f, t) { return "Te quedan " + f + " de " + t + " apartados por resolver. Puedes terminar la lección igualmente y volver después."; }, todos: function (t) { return "Has resuelto los " + t + " apartados."; }, marcar: "Marcar la lección como terminada",
+      nivel: "Nivel", opcional: "opcional", comprobar: "Comprobar", resultado: "resultado", pista: "Pedir una pista al tutor", verSol: "Ver la solución paso a paso", intento: function (n) { return "Intento " + n + " de 3 antes de desbloquear la solución"; },
+      elige: "Elige una opción.", correcto: "Correcto.", noCoincide: "No coincide. ", revisa: "Revisa el planteamiento paso a paso.",
+      tutorT: "Pregunta al tutor", tutorP: "Dudas sobre la lección, un paso que no ves claro o una curiosidad. Responde Claude con tu cuenta.", tutorPh: "Por ejemplo: ¿por qué un exponente negativo significa dividir?", preguntar: "Preguntar", tuPregunta: "Tu pregunta",
+      pensando: "Pensando…", ocupado: "El tutor está ocupado. Vuelve a intentarlo en un minuto.", noDisp: "El tutor no está disponible ahora. Puedes seguir con las pistas de la página o preguntar en el chat del proyecto.",
+      max180: " Máximo 180 palabras.\n\nLección actual: ", contenido: ". Contenido: ", previa: "Conversación previa:\n", pregAl: "Pregunta del alumno: ", alumno: "Alumno: ", tutor: "Tutor: ",
+      hintP: " Máximo 90 palabras.\n\nEl alumno ha fallado un ejercicio. Señala en qué paso es más probable que falle su razonamiento y dale una pista para seguir. NO reveles el resultado correcto ni hagas tú el cálculo completo.\n\nEnunciado: ", apartado: "\nApartado: ", respAl: "\nRespuesta del alumno: ", respOk: "\nRespuesta correcta (no la reveles): ", refSol: "\nResolución de referencia (no la copies): ",
+      sLocal: "Guardado en este navegador", sGuardando: "Guardando…", sCuenta: "Guardado en tu cuenta", sSolo: "Guardado solo en este navegador" },
+    en: { fase: "Part", leccion: "Lesson", tiempo: "Estimated time", mapa: "Course map", continua: "Pick up where you left off", empieza: "Start here", continuar: "Continue", empezar: "Start",
+      alDia: "All caught up", finTodo: "You have finished every lesson", finTodoP: "Book the exam, and keep the cheat sheets for the last week.", lecHechas: "lessons finished", apResueltos: "questions answered correctly", ruta: "The full route",
+      ejIntro: "Choose your answer and press Check. A wrong answer gets a hint, not the solution. The full explanation unlocks when you get it right or after three attempts.",
+      notaPh: "Write here. It saves automatically.", hecha: "Lesson finished.", sigueCon: "Go on to", ultima: "This is the last lesson.", pendiente: "Mark as not finished",
+      quedan: function (f, t) { return f + " of " + t + " questions are still open. You can finish the lesson anyway and come back later."; }, todos: function (t) { return "You have answered all " + t + " questions."; }, marcar: "Mark the lesson as finished",
+      nivel: "Level", opcional: "optional", comprobar: "Check", resultado: "answer", pista: "Ask the tutor for a hint", verSol: "Show the explanation", intento: function (n) { return "Attempt " + n + " of 3 before the explanation unlocks"; },
+      elige: "Choose an answer.", correcto: "Correct.", noCoincide: "Not quite. ", revisa: "Read the scenario again, one requirement at a time.",
+      tutorT: "Ask the tutor", tutorP: "Questions about this lesson, a setting you do not understand, or a scenario you want to check. Claude answers with your account.", tutorPh: "For example: when do I need a private endpoint instead of a service endpoint?", preguntar: "Ask", tuPregunta: "Your question",
+      pensando: "Thinking…", ocupado: "The tutor is busy. Try again in a minute.", noDisp: "The tutor is not available right now. You can carry on with the hints on the page.",
+      max180: " At most 180 words.\n\nCurrent lesson: ", contenido: ". Content: ", previa: "Earlier conversation:\n", pregAl: "Student's question: ", alumno: "Student: ", tutor: "Tutor: ",
+      hintP: " At most 90 words.\n\nThe student got an exam-style question wrong. Point to the requirement in the scenario they most likely misread and give a hint. Do NOT reveal the correct answer.\n\nScenario: ", apartado: "\nQuestion: ", respAl: "\nStudent's answer: ", respOk: "\nCorrect answer (do not reveal it): ", refSol: "\nReference explanation (do not copy it): ",
+      sLocal: "Saved in this browser", sGuardando: "Saving…", sCuenta: "Saved to your account", sSolo: "Saved in this browser only" }
+  };
+  var T = STR.es;
+  function faseL(n) { var f = C.fases.find(function (x) { return x.n === n; }); return f && f.etiqueta ? f.etiqueta : T.fase + " " + n; }
+  function setCourse() {
+    var k = /^#az-/.test(location.hash) && COURSES.az ? "az" : "astro";
+    var sy = $("#sync"), was = T;
+    CK = k; C = COURSES[k]; T = STR[C.lang || "es"];
+    ["sLocal", "sGuardando", "sCuenta", "sSolo"].forEach(function (q) { if (sy.textContent === was[q]) sy.textContent = T[q]; });
+    document.documentElement.lang = C.lang || "es";
+    document.title = C.nombre || "Curso de Astronomía";
+    $("#brandT").textContent = C.nombre || "Curso de Astronomía";
+    $("#brand").setAttribute("href", "#" + (C.inicio || "inicio"));
+    $("#mapBtn").textContent = T.mapa; mapa.setAttribute("aria-label", T.mapa);
+    document.querySelectorAll("#cursos a").forEach(function (a) { a.setAttribute("aria-current", String(a.dataset.c === k)); a.hidden = a.dataset.c === "az" && !COURSES.az; });
+  }
+  function anyById(id) { var r = null; Object.keys(COURSES).forEach(function (k) { if (COURSES[k] && !r) r = COURSES[k].lecciones.find(function (l) { return l.id === id; }); }); return r; }
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var main = $("#main"), mapa = $("#mapa");
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+
+  /* ── Fórmulas ── */
+  var mathOut = "htmlAndMathml";
+  (function () { // si la hoja de estilos de KaTeX no cargó, usa MathML nativo
+    var t = document.createElement("span"); t.className = "katex"; t.innerHTML = '<span class="katex-mathml">x</span>';
+    document.body.appendChild(t);
+    if (getComputedStyle(t.firstChild).position !== "absolute") mathOut = "mathml";
+    t.remove();
+  })();
+  function k(tex, block) {
+    if (!window.katex) return esc(tex);
+    try { return katex.renderToString(tex, { displayMode: !!block, throwOnError: false, output: mathOut }); }
+    catch (e) { return esc(tex); }
+  }
+  function M(html) {
+    if (C.math === false) return String(html);
+    return String(html).replace(/\$\$([\s\S]+?)\$\$/g, function (_, t) { return k(t, true); })
+                       .replace(/\$([^$\n]+?)\$/g, function (_, t) { return k(t, false); });
+  }
+  function num(x, d) { return x.toLocaleString("es-ES", { maximumSignificantDigits: d || 3, useGrouping: false }); }
+  function sci(x, d) {
+    if (x === 0) return "0";
+    var e = Math.floor(Math.log10(Math.abs(x))), m = x / Math.pow(10, e);
+    var ms = num(m, d || 3); if (ms === "10") { ms = "1"; e += 1; }
+    return ms + ' × 10<sup>' + String(e).replace("-", "−") + "</sup>";
+  }
+
+  /* ── Estado y guardado ── */
+  var S = { lec: {} }, db = null, sample = null, timers = {}, chains = {};
+  try { var raw = localStorage.getItem(LS); if (raw) S = JSON.parse(raw) || S; if (!S.lec) S.lec = {}; } catch (e) {}
+  function st(id) { return S.lec[id] || (S.lec[id] = { r: {}, notas: {}, tareas: {}, hecha: false, sec: 0, t: 0 }); }
+  function setSync(t) { $("#sync").textContent = t; }
+  function save(id) {
+    st(id).t = Date.now();
+    try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {}
+    progress();
+    if (!db) return;
+    clearTimeout(timers[id]);
+    setSync(T.sGuardando);
+    timers[id] = setTimeout(function () { push(id); }, 900);
+  }
+  function push(id) {
+    var L = anyById(id), data = Object.assign({ titulo: L ? L.titulo : id }, JSON.parse(JSON.stringify(st(id))));
+    chains[id] = (chains[id] || Promise.resolve()).then(function () { return db.doc("progreso/" + id).set(data); })
+      .then(function () { setSync(T.sCuenta); })
+      .catch(function () { setSync(T.sSolo); });
+  }
+  function byId(id) { return C.lecciones.find(function (l) { return l.id === id; }); }
+  function partes(L) {
+    var out = [];
+    L.secciones.forEach(function (s) { (s.ejercicios || []).forEach(function (e) { e.partes.forEach(function (p) { out.push({ e: e, p: p, k: e.id + "_" + p.id }); }); }); });
+    return out;
+  }
+  function avance(L) {
+    var ps = partes(L).filter(function (x) { return !x.p.opcional; }), r = st(L.id).r;
+    var ok = ps.filter(function (x) { return r[x.k] && r[x.k].ok; }).length;
+    return { ok: ok, total: ps.length };
+  }
+  function progress() {
+    var ok = 0, total = 0;
+    C.lecciones.forEach(function (L) { var a = avance(L); ok += a.ok; total += a.total; });
+    var pc = total ? Math.round(100 * ok / total) : 0;
+    $("#gbar").style.width = pc + "%"; $("#gtxt").textContent = pc + " %";
+    renderMap();
+  }
+
+  /* ── Mapa lateral ── */
+  function current() { var h = location.hash.replace("#", ""); return byId(h) ? h : "inicio"; }
+  function renderMap() {
+    var cur = current(), h = "";
+    C.fases.forEach(function (f) {
+      var ls = C.lecciones.filter(function (l) { return l.fase === f.n; });
+      h += '<div class="fase"><div class="fase-t">' + esc(faseL(f.n)) + " · " + esc(f.titulo) + "</div><ul>";
+      ls.forEach(function (L) {
+        var a = avance(L), s = st(L.id), cls = s.hecha ? "done" : (a.ok > 0 ? "part" : "");
+        h += '<li><a href="#' + L.id + '"' + (cur === L.id ? ' aria-current="page"' : "") + '><span class="dot ' + cls + '"></span><span>' + L.n + ". " + esc(L.titulo) + "</span></a></li>";
+      });
+      f.proximas.forEach(function (p) { h += '<li><span class="prox"><span class="dot"></span><span>' + esc(p) + "</span></span></li>"; });
+      h += "</ul></div>";
+    });
+    mapa.innerHTML = h;
+  }
+  $("#mapBtn").addEventListener("click", function () {
+    var o = mapa.classList.toggle("open"); this.setAttribute("aria-expanded", o);
+  });
+
+  /* ── Inicio ── */
+  function renderHome() {
+    var H = C.home || {};
+    var sig = C.lecciones.find(function (L) { return !st(L.id).hecha; });
+    var hechas = C.lecciones.filter(function (L) { return st(L.id).hecha; }).length, ok = 0, total = 0;
+    C.lecciones.forEach(function (L) { var a = avance(L); ok += a.ok; total += a.total; });
+    var empezada = sig && (avance(sig).ok > 0 || st(sig.id).sec > 0);
+    var h = '<div class="eyebrow">' + esc(H.eyebrow || "Tu plan · 5 horas por semana") + '</div><h1 class="h-title">' + esc(H.titulo || "Del cielo a simple vista a la astrofísica") + '</h1>' +
+      '<p class="h-sub">' + esc(H.sub || "Cada lección sigue el mismo camino: intuición, desarrollo paso a paso, un ejemplo con datos reales, ejercicios que se corrigen al momento y una práctica bajo el cielo.") + '</p>';
+    if (sig) h += '<div class="card next"><div><div class="eyebrow">' + (empezada ? T.continua : T.empieza) + "</div><h2>" + T.leccion + " " + sig.n + " · " + esc(sig.titulo) + "</h2><p>" + esc(sig.sub) + " " + T.tiempo + ": " + sig.horas + '.</p></div><a class="btn" href="#' + sig.id + '">' + (empezada ? T.continuar : T.empezar) + "</a></div>";
+    else h += '<div class="card next"><div><div class="eyebrow">' + T.alDia + "</div><h2>" + T.finTodo + "</h2><p>" + T.finTodoP + "</p></div></div>";
+    var fa = sig ? sig.fase : C.fases[C.fases.length - 1].n, s3 = H.stat3 || ["Fase " + fa, "de " + C.fases.length + ", hasta febrero de 2030"];
+    h += '<div class="stats"><div class="stat"><b>' + hechas + " / " + C.lecciones.length + "</b><span>" + T.lecHechas + '</span></div><div class="stat"><b>' + ok + " / " + total + "</b><span>" + T.apResueltos + '</span></div><div class="stat"><b>' + esc(s3[0]) + "</b><span>" + esc(s3[1]) + "</span></div></div>";
+    if (H.extra) h += H.extra;
+    h += '<h2 style="font-size:1.3rem">' + T.ruta + '</h2><div class="ruta">';
+    C.fases.forEach(function (f) {
+      h += '<div class="ruta-f' + (f.n === fa ? " on" : "") + '"><div class="ruta-n">' + f.n + "</div><div><h3>" + esc(f.titulo) + '</h3><div class="meta">' + esc(f.meta || (f.duracion + " · " + f.fechas)) + "</div><p>" + esc(f.resumen) + "</p></div></div>";
+    });
+    main.innerHTML = h + "</div>";
+  }
+
+  /* ── Lección ── */
+  function renderLesson(L, keepScroll) {
+    var s = st(L.id), i = Math.min(s.sec || 0, L.secciones.length - 1), sec = L.secciones[i];
+    var h = '<div class="eyebrow">' + esc(faseL(L.fase)) + " · " + T.leccion + " " + L.n + (L.codigo ? " · " + esc(L.codigo) : "") + '</div><h1 class="h-title">' + esc(L.titulo) + '</h1><p class="h-sub">' + esc(L.sub) + " " + T.tiempo + ": " + L.horas + '.</p><div class="steps" role="tablist">';
+    L.secciones.forEach(function (x, j) { h += '<button type="button" role="tab" data-sec="' + j + '" aria-selected="' + (j === i) + '">' + esc(x.titulo) + "</button>"; });
+    h += '</div><section class="sec" id="sec">';
+    if (sec.ejercicios) {
+      h += "<p>" + T.ejIntro + "</p>";
+      sec.ejercicios.forEach(function (e) { h += ejHTML(L, e); });
+    } else if (sec.puntos) {
+      h += '<ul class="puntos">' + sec.puntos.map(function (p) { return "<li>" + M(p) + "</li>"; }).join("") + "</ul>" + cierreHTML(L);
+    } else {
+      h += M(sec.html);
+      if (sec.notas) h += notasHTML(L, sec.notas);
+      if (sec.tareas) {
+        h += "<h3>" + esc(sec.tareasTitulo) + "</h3>" + (sec.tareasIntro ? "<p>" + esc(sec.tareasIntro) + "</p>" : "") + '<ul class="tareas">';
+        sec.tareas.forEach(function (t) { h += '<li><label><input type="checkbox" id="tk-' + L.id + "-" + t.id + '" data-tarea="' + t.id + '"' + (s.tareas[t.id] ? " checked" : "") + "><span>" + esc(t.texto) + "</span></label></li>"; });
+        h += "</ul>";
+      }
+      if (sec.notas2) h += notasHTML(L, sec.notas2);
+    }
+    h += '</section><div class="pager">' +
+      (i > 0 ? '<button class="btn ghost" type="button" data-sec="' + (i - 1) + '">← ' + esc(L.secciones[i - 1].titulo) + "</button>" : "<span></span>") +
+      (i < L.secciones.length - 1 ? '<button class="btn" type="button" data-sec="' + (i + 1) + '">' + esc(L.secciones[i + 1].titulo) + " →</button>" : "") + "</div>";
+    h += tutorHTML();
+    main.innerHTML = h;
+    main.querySelectorAll("[data-widget]").forEach(function (el) { var f = W[el.dataset.widget]; if (f) f(el); });
+    if (!keepScroll) window.scrollTo(0, 0);
+  }
+  function notasHTML(L, ns) {
+    var s = st(L.id);
+    return ns.map(function (n) { var id = "nt-" + L.id + "-" + n.id; return '<div class="campo"><label for="' + id + '">' + esc(n.label) + '</label><textarea id="' + id + '" data-nota="' + n.id + '" placeholder="' + T.notaPh + '">' + esc(s.notas[n.id] || "") + "</textarea></div>"; }).join("");
+  }
+  function cierreHTML(L) {
+    var a = avance(L), s = st(L.id), falta = a.total - a.ok, sig = C.lecciones.find(function (x) { return x.n === L.n + 1; });
+    var h = '<div class="card" style="margin-top:24px">';
+    if (s.hecha) h += "<strong>" + T.hecha + "</strong> " + (sig ? T.sigueCon + ' <a href="#' + sig.id + '">' + T.leccion + " " + sig.n + "</a>." : T.ultima) + ' <button class="link" type="button" data-hecha="0">' + T.pendiente + "</button>";
+    else h += "<p style=\"margin:0 0 12px\">" + (falta ? T.quedan(falta, a.total) : T.todos(a.total)) + '</p><button class="btn" type="button" data-hecha="1">' + T.marcar + "</button>";
+    return h + "</div>";
+  }
+
+  /* ── Ejercicios ── */
+  function ejHTML(L, e) {
+    var est = "★★★".slice(0, e.nivel) + "☆☆☆".slice(0, 3 - e.nivel);
+    var h = '<article class="card ej"><div class="ej-h"><h3>' + esc(e.titulo) + '</h3><span class="nivel">' + T.nivel + " <b>" + est + '</b></span></div><div class="ej-b">' + M(e.enunciado);
+    e.partes.forEach(function (p, j) { h += parteHTML(L, e, p, j); });
+    return h + "</div></article>";
+  }
+  function parteHTML(L, e, p, j) {
+    var key = e.id + "_" + p.id, r = st(L.id).r[key] || {}, v = r.v || [], id = "in-" + L.id + "-" + key;
+    var h = '<div class="parte" data-k="' + key + '"><div class="preg"><span class="l">' + "abcdef"[j] + ')</span><div>' + M(p.pregunta) + (p.opcional ? '<span class="opc">' + T.opcional + "</span>" : "") + '</div></div><form class="resp" novalidate>';
+    if (p.tipo === "multi") {
+      h += '<div class="ops" role="group">';
+      p.opciones.forEach(function (o, n) { h += '<label><input type="checkbox" id="' + id + "-" + n + '" value="' + n + '"' + (v.indexOf(String(n)) >= 0 ? " checked" : "") + "><span>" + M(esc(o)) + "</span></label>"; });
+      h += "</div>";
+    } else if (p.tipo === "opcion") {
+      h += '<div class="ops" role="radiogroup">';
+      p.opciones.forEach(function (o, n) { h += '<label><input type="radio" name="' + id + '" id="' + id + "-" + n + '" value="' + n + '"' + (String(v[0]) === String(n) ? " checked" : "") + "><span>" + M(esc(o)) + "</span></label>"; });
+      h += "</div>";
+    } else if (p.tipo === "sci") {
+      h += '<input type="text" class="mant" id="' + id + '-m" inputmode="decimal" autocomplete="off" aria-label="Mantisa" placeholder="mantisa" value="' + esc(v[0] || "") + '"><span class="x10">× 10</span><input type="text" class="expo" id="' + id + '-e" inputmode="text" autocomplete="off" aria-label="Exponente" placeholder="exp" value="' + esc(v[1] || "") + '">';
+    } else {
+      h += '<input type="text" class="val" id="' + id + '-v" inputmode="decimal" autocomplete="off" aria-label="Resultado" placeholder="' + T.resultado + '" value="' + esc(v[0] || "") + '">';
+    }
+    if (p.unidad) h += '<span class="u">' + esc(p.unidad) + "</span>";
+    h += '<button class="btn" type="submit">' + T.comprobar + "</button></form>";
+    if (r.msg) h += '<div class="fb ' + (r.ok ? "ok" : "no") + '" role="status">' + esc(r.msg) + "</div>";
+    var acc = "";
+    if (!r.ok && r.n > 0 && sample) acc += '<button class="link" type="button" data-pista>' + T.pista + "</button>";
+    if ((r.ok || r.n >= 3) && !r.sol) acc += '<button class="link" type="button" data-sol>' + T.verSol + "</button>";
+    if (!r.ok && r.n > 0 && r.n < 3) acc += '<span style="font-size:.85rem;color:var(--muted)">' + T.intento(r.n) + "</span>";
+    if (acc) h += '<div class="acc">' + acc + "</div>";
+    h += '<div class="tut" data-tut></div>';
+    if (r.sol) h += '<div class="sol">' + M(p.solucion) + "</div>";
+    return h + "</div>";
+  }
+  function parse(sx) {
+    var t = String(sx).trim().replace(/\s/g, "").replace("−", "-").replace(",", ".");
+    if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t)) return NaN;
+    return parseFloat(t);
+  }
+  function near(a, b, tol) { return Math.abs(a - b) <= tol * Math.abs(b); }
+  function evaluar(p, vals) {
+    if (p.tipo === "multi") {
+      if (!vals.length) return { err: T.elige };
+      var want = p.respuesta.map(String).sort().join(","), got = vals.slice().sort().join(",");
+      if (want === got) return { ok: true, msg: T.correcto };
+      if (vals.length !== p.respuesta.length) return { ok: false, msg: T.noCoincide + (C.lang === "en" ? "Select exactly " + p.respuesta.length + " answers." : "Elige exactamente " + p.respuesta.length + " opciones.") };
+      return { ok: false, hint: true };
+    }
+    if (p.tipo === "opcion") {
+      if (vals[0] === undefined) return { err: T.elige };
+      return Number(vals[0]) === p.respuesta ? { ok: true, msg: T.correcto } : { ok: false, hint: true };
+    }
+    var x, m, e;
+    if (p.tipo === "sci") {
+      m = parse(vals[0]); e = vals[1] === "" ? 0 : parse(vals[1]);
+      if (isNaN(m)) return { err: "Escribe la mantisa como un número, por ejemplo 1,5." };
+      if (isNaN(e) || e !== Math.round(e)) return { err: "El exponente debe ser un número entero, por ejemplo 8 o -3." };
+      x = m * Math.pow(10, e);
+    } else {
+      x = parse(vals[0]);
+      if (isNaN(x)) return { err: "Escribe un número, por ejemplo 12,5 o 3e8." };
+    }
+    var tol = p.tol || 0.02, a = p.respuesta;
+    if (near(x, a, tol)) {
+      var extra = (p.tipo === "sci" && (Math.abs(m) >= 10 || Math.abs(m) < 1)) ? " El valor es correcto, aunque en notación científica la mantisa se escribe entre 1 y 10." : "";
+      return { ok: true, msg: "Correcto." + extra };
+    }
+    var hit = (p.errores || []).find(function (q) { return near(x, q.v, 0.03); });
+    if (hit) return { ok: false, msg: hit.msg };
+    if (near(x, -a, tol)) return { ok: false, msg: "El valor absoluto es correcto, pero el signo no. Revisa de dónde sale." };
+    if (x !== 0 && x / a > 0) {
+      var d = Math.log10(x / a), n = Math.round(d);
+      if (n !== 0 && Math.abs(d - n) < 0.012) return { ok: false, msg: "Las cifras son correctas, pero el resultado está desplazado " + Math.abs(n) + (Math.abs(n) === 1 ? " orden" : " órdenes") + " de magnitud. Revisa el exponente o un cambio de unidades." };
+    }
+    return { ok: false, hint: true };
+  }
+  function findParte(L, key) { return partes(L).find(function (x) { return x.k === key; }); }
+  function rerender(L, key) {
+    var x = findParte(L, key), el = main.querySelector('.parte[data-k="' + key + '"]');
+    var tmp = document.createElement("div"); tmp.innerHTML = parteHTML(L, x.e, x.p, x.e.partes.indexOf(x.p));
+    el.replaceWith(tmp.firstChild);
+  }
+
+  /* ── Tutor (Claude) ── */
+  var chat = {}, busy = false;
+  function tutorHTML() {
+    if (!sample) return "";
+    var id = current(), log = chat[id] || [];
+    return '<section class="tutor card"><h3>' + T.tutorT + '</h3><p class="h">' + T.tutorP + "</p>" + '<div class="chat" id="chat">' +
+      log.map(function (m) { return '<div class="msg ' + (m.role === "user" ? "u" : "t") + '">' + rich(m.content) + "</div>"; }).join("") +
+      '</div><form id="tform"><textarea id="tq" aria-label="' + T.tuPregunta + '" placeholder="' + esc(C.tutorPh || T.tutorPh) + '"></textarea><button class="btn" type="submit">' + T.preguntar + "</button>" + '</form></section>';
+  }
+  function rich(t) { return M(esc(t)).split(/\n{2,}/).map(function (p) { return "<p>" + p.replace(/\n/g, "<br>") + "</p>"; }).join(""); }
+  var BASE = "Eres un tutor de astronomía y astrofísica para un ingeniero de telecomunicaciones que retoma las matemáticas tras años sin practicar. Responde en español de España, con rigor y cercanía. Explica la intuición antes que la fórmula y no des ningún paso matemático por supuesto. Relaciona con ingeniería (señales, antenas, dB, Fourier) cuando ayude. Escribe las fórmulas en LaTeX entre signos de dólar, por ejemplo $a^m a^n = a^{m+n}$. Sin encabezados ni listas con formato Markdown; párrafos cortos. Distingue lo establecido de lo que sigue en debate científico.";
+  function ask(prompt, target, done) {
+    if (busy || !sample) return; busy = true;
+    target.innerHTML = "<p>" + T.pensando + "</p>";
+    sample(prompt, { cache: false, onText: function (o) { target.innerHTML = rich(o.text); } })
+      .then(function (r) { target.innerHTML = rich(r.text); done && done(r.text); })
+      .catch(function (e) {
+        if (e && e.text) { target.innerHTML = rich(e.text); done && done(e.text); }
+        else target.innerHTML = "<p>" + (e && e.code === "rate_limited" ? T.ocupado : T.noDisp) + "</p>";
+      })
+      .then(function () { busy = false; });
+  }
+
+  /* ── Eventos ── */
+  main.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var L = byId(current()); if (!L) return;
+    if (ev.target.id === "tform") {
+      var q = $("#tq").value.trim(); if (!q || busy) return;
+      var log = chat[L.id] || (chat[L.id] = []);
+      log.push({ role: "user", content: q });
+      var box = $("#chat"), u = document.createElement("div"), t = document.createElement("div");
+      u.className = "msg u"; u.innerHTML = rich(q); t.className = "msg t"; box.append(u, t); $("#tq").value = "";
+      var hist = log.slice(-7, -1).map(function (m) { return (m.role === "user" ? T.alumno : T.tutor) + m.content; }).join("\n");
+      ask((C.tutor || BASE) + T.max180 + L.titulo + T.contenido + L.contexto + "\n\n" + (hist ? T.previa + hist + "\n\n" : "") + T.pregAl + q, t, function (txt) { log.push({ role: "assistant", content: txt }); });
+      return;
+    }
+    var pe = ev.target.closest(".parte"); if (!pe) return;
+    var key = pe.dataset.k, x = findParte(L, key), s = st(L.id), r = s.r[key] || (s.r[key] = { n: 0 });
+    var vals;
+    if (x.p.tipo === "multi") vals = Array.prototype.map.call(pe.querySelectorAll("input:checked"), function (c) { return c.value; });
+    else if (x.p.tipo === "opcion") { var c = pe.querySelector("input:checked"); vals = [c ? c.value : undefined]; }
+    else if (x.p.tipo === "sci") vals = [$(".mant", pe).value, $(".expo", pe).value];
+    else vals = [$(".val", pe).value];
+    var res = evaluar(x.p, vals);
+    if (res.err) { r.msg = res.err; r.v = vals; rerender(L, key); return; }
+    r.v = vals; r.n = (r.n || 0) + 1; r.ok = !!res.ok;
+    if (res.ok) r.msg = res.msg;
+    else if (res.msg) r.msg = res.msg;
+    else { var ps = x.p.pistas || []; r.msg = T.noCoincide + (ps.length ? ps[Math.min(r.n - 1, ps.length - 1)] : T.revisa); }
+    save(L.id); rerender(L, key);
+  });
+  main.addEventListener("click", function (ev) {
+    var L = byId(current()); if (!L) return;
+    var b = ev.target.closest("[data-sec]");
+    if (b) { st(L.id).sec = Number(b.dataset.sec); save(L.id); renderLesson(L); return; }
+    var hb = ev.target.closest("[data-hecha]");
+    if (hb) { st(L.id).hecha = hb.dataset.hecha === "1"; save(L.id); renderLesson(L, true); return; }
+    var pe = ev.target.closest(".parte"); if (!pe) return;
+    var key = pe.dataset.k, x = findParte(L, key), r = st(L.id).r[key];
+    if (ev.target.closest("[data-sol]")) { r.sol = true; save(L.id); rerender(L, key); return; }
+    if (ev.target.closest("[data-pista]")) {
+      var t = $("[data-tut]", pe); t.className = "tut fb info";
+      var pick = function (a) { return a.map(function (n) { return x.p.opciones[Number(n)]; }).join(" | "); };
+      var dada = x.p.tipo === "multi" ? pick(r.v) : x.p.tipo === "opcion" ? x.p.opciones[Number(r.v[0])] : (x.p.tipo === "sci" ? r.v[0] + " × 10^" + (r.v[1] || 0) : r.v[0]);
+      var buena = x.p.tipo === "multi" ? pick(x.p.respuesta) : x.p.tipo === "opcion" ? x.p.opciones[x.p.respuesta] : x.p.respuesta;
+      ask((C.tutor || BASE) + T.hintP + x.e.enunciado.replace(/<[^>]+>/g, "") + T.apartado + x.p.pregunta.replace(/<[^>]+>/g, "") + (x.p.unidad ? " (" + x.p.unidad + ")" : "") + T.respAl + dada + T.respOk + buena + T.refSol + x.p.solucion, t);
+    }
+  });
+  main.addEventListener("input", function (ev) {
+    var L = byId(current()); if (!L) return;
+    var t = ev.target;
+    if (t.dataset.nota) { st(L.id).notas[t.dataset.nota] = t.value; save(L.id); }
+  });
+  main.addEventListener("change", function (ev) {
+    var L = byId(current()); if (!L) return;
+    var t = ev.target;
+    if (t.dataset.tarea) { st(L.id).tareas[t.dataset.tarea] = t.checked; save(L.id); }
+  });
+
+  /* ── Widgets ── */
+  var W = {};
+  var ESC = { "-15": "Un protón.", "-14": "Un núcleo atómico.", "-10": "Un átomo.", "-9": "La anchura de una molécula de ADN.", "-7": "Un virus.", "-6": "Una bacteria.", "-5": "Un glóbulo rojo.", "-4": "El grosor de un cabello.", "-3": "Un grano de arena.", "-2": "Una uña.", "-1": "Una mano.", "0": "Un niño pequeño.", "1": "Una casa.", "2": "Un campo de fútbol.", "3": "Un paseo de diez minutos.", "4": "La altura del Everest.", "5": "Una gran ciudad y sus alrededores.", "6": "España de norte a sur.", "7": "El diámetro de la Tierra: 1,3 × 10⁷ m.", "8": "La Luna está a 3,8 × 10⁸ m.", "9": "El diámetro del Sol: 1,4 × 10⁹ m.", "10": "Unas 25 veces la distancia a la Luna.", "11": "De la Tierra al Sol: 1 UA son 1,5 × 10¹¹ m.", "12": "La órbita de Júpiter.", "13": "El sistema solar hasta Neptuno. La Voyager 1 está a 2,5 × 10¹³ m.", "14": "Unas 700 UA: el vacío más allá de los planetas.", "15": "Una décima de año luz.", "16": "Un año luz son 9,5 × 10¹⁵ m. Próxima Centauri está a 4 × 10¹⁶ m.", "17": "Unos 10 años luz: Sirio y las estrellas vecinas.", "18": "Unos 100 años luz: muchas de las estrellas brillantes del cielo.", "19": "Unos 1000 años luz: la nebulosa de Orión está a 1300.", "20": "El centro de la Vía Láctea está a 2,5 × 10²⁰ m.", "21": "El disco de la Vía Láctea: 100 000 años luz.", "22": "La galaxia de Andrómeda, a 2,4 × 10²² m.", "23": "Unos 10 millones de años luz: las galaxias vecinas.", "24": "Unos 100 millones de años luz: supercúmulos de galaxias.", "25": "Mil millones de años luz: la red cósmica de filamentos y vacíos.", "26": "El radio del universo observable: 4,4 × 10²⁶ m.", "27": "El diámetro del universo observable." };
+  function tluz(n) {
+    var t = Math.pow(10, n) / 2.998e8, A = 3.156e7;
+    if (t < 1e-3) return sci(t, 2) + " s";
+    if (t < 1) return num(t * 1000, 2) + " ms";
+    if (t < 120) return num(t, 2) + " s";
+    if (t < 7200) return num(t / 60, 2) + " min";
+    if (t < 172800) return num(t / 3600, 2) + " h";
+    if (t < A) return num(t / 86400, 2) + " días";
+    if (t < 1e4 * A) return num(t / A, 2) + " años";
+    return sci(t / A, 2) + " años";
+  }
+  W.escala = function (el) {
+    el.className = "w";
+    el.innerHTML = '<div class="w-big" id="esc-n"></div><p class="w-txt" id="esc-t"></p><label for="esc-r" class="w-cap"><span>núcleo atómico</span><span>universo observable</span></label><input type="range" id="esc-r" min="-15" max="27" step="1" value="11"><div class="w-row"><div><b id="esc-l"></b>tiempo que tarda la luz</div><div><b id="esc-d"></b>respecto a 1 metro</div></div>';
+    var r = $("#esc-r", el);
+    function up() {
+      var n = Number(r.value), kx = n; while (!ESC[kx]) kx--;
+      $("#esc-n", el).innerHTML = "10<sup>" + String(n).replace("-", "−") + "</sup> m";
+      $("#esc-t", el).textContent = ESC[kx] + (kx !== n ? " (Diez veces más.)" : "");
+      $("#esc-l", el).innerHTML = tluz(n);
+      $("#esc-d", el).textContent = (n > 0 ? "+" : "") + String(n * 10).replace("-", "−") + " dB";
+    }
+    r.addEventListener("input", up); up();
+  };
+  W.paralaje = function (el) {
+    if (window.FIGS && window.FIGS.paralaje) { window.FIGS.paralaje(el); return; }
+    el.className = "w";
+    el.innerHTML = '<label for="par-r" class="w-cap"><span>Mueve la estrella: más cerca</span><span>más lejos</span></label><input type="range" id="par-r" min="0" max="100" step="1" value="18">' +
+      '<svg viewBox="0 0 520 150" role="img" aria-label="Triángulo de paralaje entre el Sol, la Tierra y una estrella"><g id="par-g"></g></svg>' +
+      '<div class="w-row"><div><b id="par-d"></b>distancia</div><div><b id="par-p"></b>paralaje p</div><div><b id="par-a"></b>en años luz</div></div><p style="font-size:.85rem;color:var(--muted);margin:8px 0 0">El dibujo exagera el ángulo millones de veces. A escala real, las dos líneas serían indistinguibles de dos paralelas.</p>';
+    var r = $("#par-r", el);
+    function up() {
+      var f = Number(r.value) / 100, d = 1.3 * Math.pow(100 / 1.3, f), x = 150 + 340 * f, c = "var(--muted)";
+      $("#par-g", el).innerHTML =
+        '<ellipse cx="40" cy="75" rx="9" ry="48" fill="none" stroke="' + c + '" stroke-dasharray="3 3"/>' +
+        '<line x1="40" y1="27" x2="' + x + '" y2="75" stroke="' + c + '"/><line x1="40" y1="123" x2="' + x + '" y2="75" stroke="' + c + '"/><line x1="40" y1="75" x2="' + x + '" y2="75" stroke="' + c + '" stroke-dasharray="2 4"/>' +
+        '<circle cx="40" cy="75" r="7" style="fill:var(--star)"/><circle cx="40" cy="27" r="4" style="fill:var(--accent)"/><circle cx="40" cy="123" r="4" style="fill:var(--accent)"/>' +
+        '<circle cx="' + x + '" cy="75" r="5" style="fill:var(--ink)"/>' +
+        '<text x="52" y="24" font-size="11" style="fill:var(--muted)">Tierra en enero</text><text x="52" y="136" font-size="11" style="fill:var(--muted)">Tierra en julio</text><text x="2" y="79" font-size="11" style="fill:var(--muted)">Sol</text>' +
+        '<text x="0" y="54" font-size="11" style="fill:var(--muted)">1 UA</text><text x="' + (x - 34) + '" y="68" font-size="12" font-style="italic" style="fill:var(--ink)">p</text><text x="' + (x - 20) + '" y="98" font-size="11" style="fill:var(--muted)">estrella</text>';
+      $("#par-d", el).textContent = num(d, 3) + " pc";
+      $("#par-p", el).textContent = num(1 / d, 3) + "″";
+      $("#par-a", el).textContent = num(d * 3.26, 3);
+    }
+    r.addEventListener("input", up); up();
+  };
+  W.telescopio = function (el) { if (window.FIGS && window.FIGS.telescopio) window.FIGS.telescopio(el); };
+  W.magnitudes = function (el) {
+    el.className = "w";
+    el.innerHTML = '<label for="mag-r" class="w-cap"><span>Diferencia de magnitudes</span><span id="mag-m"></span></label><input type="range" id="mag-r" min="0" max="25" step="0.5" value="5"><div class="w-row"><div><b id="mag-f"></b>veces más flujo</div><div><b id="mag-d"></b>en decibelios</div></div><p class="w-txt" id="mag-t" style="font-size:.92rem;color:var(--muted)"></p>';
+    var r = $("#mag-r", el), EJ = [[0, "Dos estrellas igual de brillantes."], [1, "Una magnitud: un factor 2,5."], [5, "Cinco magnitudes son exactamente un factor 100: de las estrellas más brillantes a las más débiles a simple vista."], [8, "De Sirio a una estrella en el límite de la simple vista."], [14, "Del Sol a la Luna llena."], [20, "De la estrella Polar a los objetos más débiles de un telescopio de aficionado con cámara."], [25, "Del límite de la simple vista a lo más débil que detecta el telescopio espacial Hubble."]];
+    function up() {
+      var m = Number(r.value), f = Math.pow(10, 0.4 * m), t = EJ[0][1];
+      EJ.forEach(function (e) { if (m >= e[0]) t = e[1]; });
+      $("#mag-m", el).textContent = num(m, 3) + " mag";
+      $("#mag-f", el).innerHTML = f < 1e4 ? num(f, 3) : sci(f, 2);
+      $("#mag-d", el).textContent = num(4 * m, 3) + " dB";
+      $("#mag-t", el).textContent = t;
+    }
+    r.addEventListener("input", up); up();
+  };
+
+  W.planck = function (el) {
+    el.className = "w";
+    el.innerHTML = '<label for="pl-r" class="w-cap"><span>Temperatura</span><span id="pl-t"></span></label><input type="range" id="pl-r" min="2500" max="12000" step="100" value="5800"><svg viewBox="0 0 600 210" role="img" aria-label="Curva de cuerpo negro"><defs><linearGradient id="pl-g" x1="0" x2="1"><stop offset="0" stop-color="#6a3fd0"/><stop offset=".25" stop-color="#2f6fe0"/><stop offset=".5" stop-color="#2fa84f"/><stop offset=".7" stop-color="#e0c020"/><stop offset="1" stop-color="#d03a2a"/></linearGradient></defs><rect id="pl-v" y="10" height="170" fill="url(#pl-g)" opacity=".22"/><line x1="10" x2="590" y1="180" y2="180" stroke="var(--line)"/><path id="pl-p" fill="none" stroke="var(--star)" stroke-width="2.5"/><line id="pl-m" y1="10" y2="180" stroke="var(--ink)" stroke-dasharray="3 4"/><g font-family="var(--mono)" font-size="11" fill="var(--muted)" id="pl-x"></g></svg><div class="w-row"><div><b id="pl-l"></b>máximo de emisión</div><div><b id="pl-f"></b>W/m² emitidos por la superficie</div><div><b id="pl-z"></b>zona del máximo</div></div><p class="w-txt">La banda de color es la luz visible. Cada curva está escalada a su propio máximo: fíjate en cómo se desplaza, y lee en la cifra central cuánto crece la emisión total.</p>';
+    var r = $("#pl-r", el), L0 = 100, L1 = 2000, X = function (l) { return 10 + 580 * (l - L0) / (L1 - L0); };
+    $("#pl-v", el).setAttribute("x", X(380)); $("#pl-v", el).setAttribute("width", X(750) - X(380));
+    $("#pl-x", el).innerHTML = [500, 1000, 1500, 2000].map(function (l) { return '<text x="' + X(l) + '" y="198" text-anchor="' + (l === 2000 ? "end" : "middle") + '">' + l + " nm</text>"; }).join("");
+    function B(l, T) { var m = l * 1e-9; return 1 / (Math.pow(m, 5) * (Math.exp(0.014388 / (m * T)) - 1)); }
+    function up() {
+      var T = Number(r.value), lm = 2.898e6 / T, mx = B(lm, T), d = "", l;
+      for (l = L0; l <= L1; l += 10) d += (l === L0 ? "M" : "L") + X(l).toFixed(1) + " " + (180 - 165 * B(l, T) / mx).toFixed(1);
+      $("#pl-p", el).setAttribute("d", d);
+      var xm = Math.min(590, X(lm)); $("#pl-m", el).setAttribute("x1", xm); $("#pl-m", el).setAttribute("x2", xm);
+      $("#pl-t", el).textContent = T + " K";
+      $("#pl-l", el).textContent = Math.round(lm) + " nm";
+      $("#pl-f", el).innerHTML = sci(5.670e-8 * Math.pow(T, 4), 3);
+      $("#pl-z", el).textContent = lm < 380 ? "ultravioleta" : lm > 750 ? "infrarrojo" : "visible";
+    }
+    r.addEventListener("input", up); up();
+  };
+
+  /* ── Rutas y arranque ── */
+  function route() {
+    setCourse();
+    var id = current(), L = byId(id);
+    mapa.classList.remove("open"); $("#mapBtn").setAttribute("aria-expanded", "false");
+    if (L) renderLesson(L); else { renderHome(); window.scrollTo(0, 0); }
+    progress();
+  }
+  window.addEventListener("hashchange", route);
+  setCourse(); progress(); route();
+
+  var use = window.claude && window.claude.use ? window.claude.use.bind(window.claude) : null;
+  if (use) {
+    use("sample").then(function (s) { if (s) { sample = s; var L = byId(current()); if (L && !main.querySelector(".tutor")) renderLesson(L, true); } });
+    use("db").then(function (d) {
+      if (!d) return;
+      var to = setTimeout(function () { setSync(T.sSolo); }, 10000);
+      d.collection("progreso").get().then(function (snap) {
+        clearTimeout(to); db = d;
+        var changed = false, remote = {};
+        snap.docs.forEach(function (doc) { remote[doc.id] = doc.data() || {}; });
+        Object.keys(remote).forEach(function (id) {
+          var rm = remote[id], lc = S.lec[id];
+          if (!lc || (rm.t || 0) > (lc.t || 0)) { S.lec[id] = Object.assign({ r: {}, notas: {}, tareas: {}, hecha: false, sec: 0, t: 0 }, rm); changed = true; }
+        });
+        Object.keys(S.lec).forEach(function (id) { if (S.lec[id].t && (!remote[id] || (remote[id].t || 0) < S.lec[id].t)) push(id); });
+        if (changed) { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} progress(); var a = document.activeElement; if (!a || !/INPUT|TEXTAREA/.test(a.tagName)) route(); }
+        setSync(T.sCuenta);
+      }).catch(function () { clearTimeout(to); setSync(T.sSolo); });
+    });
+  }
+})();
+</script>
