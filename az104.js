@@ -133,7 +133,16 @@ LESSONS.push({
 <li>An <strong>availability zone</strong> is one or more datacentres inside a region with independent power, cooling and network. Regions that support zones have at least three.</li>
 <li>A <strong>region pair</strong> is two regions in the same geography, hundreds of kilometres apart, that Microsoft updates one after the other. Geo-redundant storage replicates to the paired region. North Europe and West Europe are a pair.</li>
 </ul>
-<p>Not every service or virtual machine size exists in every region. When a scenario says a deployment fails only in one region, think of availability and quota.</p>` },
+<p>Not every service or virtual machine size exists in every region. When a scenario says a deployment fails only in one region, think of availability and quota.</p>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-cloud-shell/" target="_blank" rel="noopener">Introduction to Azure Cloud Shell</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/describe-core-architectural-components-of-azure/" target="_blank" rel="noopener">Describe the core architectural components of Azure</a></li>
+</ul>
+` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 0. Your subscription and your first resource group</h3>
@@ -318,7 +327,22 @@ LESSONS.push({
 </ul>
 
 <h3>7. Administrative units</h3>
-<p>An administrative unit is a container of users, groups or devices inside the tenant. You assign an Entra role scoped to the unit, so that a help-desk technician in Madrid can reset passwords only for users in the Madrid unit. It needs P1 for the administrators. It is the Entra equivalent of delegating on an organisational unit.</p>` },
+<p>An administrative unit is a container of users, groups or devices inside the tenant. You assign an Entra role scoped to the unit, so that a help-desk technician in Madrid can reset passwords only for users in the Madrid unit. It needs P1 for the administrators. It is the Entra equivalent of delegating on an organisational unit.</p>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/understand-azure-active-directory/" target="_blank" rel="noopener">Understand Microsoft Entra ID</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/create-configure-manage-identities/" target="_blank" rel="noopener">Create, configure, and manage identities</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/allow-users-reset-their-password/" target="_blank" rel="noopener">Allow users to reset their password with Microsoft Entra self-service password reset</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b" target="_blank" rel="noopener">What is Microsoft Entra B2B collaboration?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity/authentication/tutorial-enable-sspr" target="_blank" rel="noopener">Tutorial: enable self-service password reset</a></li>
+<li><a href="https://learn.microsoft.com/en-us/microsoft-365/admin/manage/manage-group-licenses?view=o365-worldwide" target="_blank" rel="noopener">Assign licenses to a group</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 1. Users, groups and a guest</h3>
@@ -539,7 +563,18 @@ New-AzRoleAssignment -SignInName ana@contoso.com -RoleDefinitionName "Virtual Ma
 <li>A <strong>service principal</strong> is the identity of an application in the tenant.</li>
 <li>A <strong>managed identity</strong> is a service principal that Azure creates and rotates for a resource, so that no password is stored anywhere. <em>System-assigned</em> lives and dies with one resource. <em>User-assigned</em> is a separate resource that several resources can share.</li>
 </ul>
-<p>Both receive role assignments exactly like users do. When a scenario says a virtual machine must read from a storage account without storing credentials, the answer is a managed identity plus a role assignment.</p>` },
+<p>Both receive role assignments exactly like users do. When a scenario says a virtual machine must read from a storage account without storing credentials, the answer is a managed identity plus a role assignment.</p>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/secure-azure-resources-with-rbac/" target="_blank" rel="noopener">Secure your Azure resources with Azure role-based access control (Azure RBAC)</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/check-access" target="_blank" rel="noopener">Check access for a user to an Azure resource</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 2. Role assignments and a custom role</h3>
@@ -739,6 +774,23 @@ LESSONS.push({
 <li><strong>Reservations</strong> commit to one or three years of a resource for a discount. <strong>Azure Hybrid Benefit</strong> reuses Windows Server and SQL Server licences you already own. <strong>Spot</strong> virtual machines use spare capacity at a large discount and can be evicted at any time.</li>
 <li>The <strong>pricing calculator</strong> estimates the cost of a design before you deploy it.</li>
 <li>A <em>stopped</em> virtual machine is still billed for compute. It must be <em>stopped (deallocated)</em> for the compute charge to end. Disks are billed either way.</li>
+</ul>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/sovereignty-policy-initiatives/" target="_blank" rel="noopener">Azure Policy initiatives</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/describe-cost-management-azure/" target="_blank" rel="noopener">Describe cost management in Azure</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/governance/policy/overview" target="_blank" rel="noopener">What is Azure Policy?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/lock-resources" target="_blank" rel="noopener">Lock your Azure resources</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources" target="_blank" rel="noopener">Use tags to organize your Azure resources</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/governance/management-groups/overview" target="_blank" rel="noopener">What are Azure management groups?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/tutorial-acm-create-budgets" target="_blank" rel="noopener">Tutorial: create and manage budgets</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/advisor/advisor-overview" target="_blank" rel="noopener">Introduction to Azure Advisor</a></li>
 </ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
@@ -960,6 +1012,20 @@ azcopy sync "C:\data" "https://ACCOUNT.blob.core.windows.net/container1"</pre></
 <li>A copy between two accounts goes directly from server to server. The data does not pass through your computer.</li>
 <li><code>copy</code> transfers everything. <code>sync</code> transfers only what differs, and with <code>--delete-destination</code> it also removes what no longer exists in the source.</li>
 <li>AzCopy works with Blob Storage and Azure Files.</li>
+</ul>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-storage-accounts/" target="_blank" rel="noopener">Configure storage accounts</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy" target="_blank" rel="noopener">Azure Storage redundancy</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-service-encryption" target="_blank" rel="noopener">Azure Storage encryption for data at rest</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/object-replication-overview" target="_blank" rel="noopener">Object replication for block blobs</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10" target="_blank" rel="noopener">Get started with AzCopy</a></li>
 </ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
@@ -1187,7 +1253,20 @@ LESSONS.push({
 <li><strong>Share level,</strong> with Azure roles: <em>Storage File Data SMB Share Reader</em> (read), <em>Contributor</em> (read, write, delete) and <em>Elevated Contributor</em> (the same, plus changing NTFS permissions).</li>
 <li><strong>File and directory level,</strong> with ordinary Windows NTFS permissions.</li>
 </ol>
-<p>Other facts: SMB uses TCP port <strong>445</strong>, which many internet providers block outbound. Mounting with the storage account key always works and gives full control, which is why it is kept for administrators. Identity-based authentication does not apply to NFS shares.</p>` },
+<p>Other facts: SMB uses TCP port <strong>445</strong>, which many internet providers block outbound. Mounting with the storage account key always works and gives full control, which is why it is kept for administrators. Identity-based authentication does not apply to NFS shares.</p>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-storage-security/" target="_blank" rel="noopener">Configure Azure Storage security</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview" target="_blank" rel="noopener">Shared access signatures (SAS)</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security" target="_blank" rel="noopener">Firewall rules and network access control for Azure Storage</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/files/storage-files-active-directory-overview" target="_blank" rel="noopener">Azure Files identity-based authentication</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 5. Keys, SAS, policies and the firewall</h3>
@@ -1429,7 +1508,22 @@ sudo mount -t cifs //ACCOUNT.file.core.windows.net/share1 /mnt/share1 -o usernam
 </ul>
 
 <h3>7. Azure File Sync, in two lines</h3>
-<p>Azure File Sync keeps an on-premises Windows file server synchronised with an Azure file share, and with cloud tiering it leaves only the most used files on the local disk. The pieces are a Storage Sync Service, a sync group, one cloud endpoint and one or more server endpoints. It is not in the current skills outline, but it appears as a wrong answer often enough to be worth recognising.</p>` },
+<p>Azure File Sync keeps an on-premises Windows file server synchronised with an Azure file share, and with cloud tiering it leaves only the most used files on the local disk. The pieces are a Storage Sync Service, a sync group, one cloud endpoint and one or more server endpoints. It is not in the current skills outline, but it appears as a wrong answer often enough to be worth recognising.</p>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-blob-storage/" target="_blank" rel="noopener">Configure Azure Blob Storage</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-azure-files-file-sync/" target="_blank" rel="noopener">Configure Azure Files</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview" target="_blank" rel="noopener">Access tiers for blob data</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-overview" target="_blank" rel="noopener">Blob Storage lifecycle management</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/versioning-overview" target="_blank" rel="noopener">Blob versioning</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/files/storage-files-prevent-file-share-deletion" target="_blank" rel="noopener">Azure file share soft delete</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 6. Tiers, lifecycle, versions and a file share</h3>
@@ -1726,6 +1820,19 @@ az bicep build --file main.bicep             # Bicep to JSON</pre></div>
 <ul>
 <li>Decompiling is a best effort. Expect warnings and some tidying.</li>
 <li>A <strong>template spec</strong> stores a template as a resource in Azure, so it can be shared and controlled with RBAC.</li>
+</ul>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/create-azure-resource-manager-template-vs-code/" target="_blank" rel="noopener">Deploy Azure infrastructure by using JSON ARM templates</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/build-first-bicep-file/" target="_blank" rel="noopener">Build your first Bicep file</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/export-template-portal" target="_blank" rel="noopener">Use the Azure portal to export a template</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/decompile" target="_blank" rel="noopener">Decompile a JSON ARM template to Bicep</a></li>
 </ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
@@ -2008,7 +2115,20 @@ az vm list-sizes --location westeurope --output table
 az vm resize --resource-group rg1 --name vm1 --size Standard_B2s
 az vm disk attach --resource-group rg1 --vm-name vm1 --name data1 --new --size-gb 32 --sku StandardSSD_LRS
 az vm deallocate --resource-group rg1 --name vm1
-az vm run-command invoke --resource-group rg1 --name vm1 --command-id RunShellScript --scripts "df -h"</pre></div>` },
+az vm run-command invoke --resource-group rg1 --name vm1 --command-id RunShellScript --scripts "df -h"</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-virtual-machines/" target="_blank" rel="noopener">Introduction to Azure virtual machines</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/managed-disks-overview" target="_blank" rel="noopener">Azure managed disks overview</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption-overview" target="_blank" rel="noopener">Overview of managed disk encryption options</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/resource-mover/overview" target="_blank" rel="noopener">What is Azure Resource Mover?</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 8. One small Linux VM</h3>
@@ -2257,7 +2377,19 @@ LESSONS.push({
 az vm create --resource-group rg1 --name vm1 --image Ubuntu2204 --availability-set avset1 --generate-ssh-keys
 az vm create --resource-group rg1 --name vm2 --image Ubuntu2204 --zone 2 --generate-ssh-keys
 az vmss create --resource-group rg1 --name vmss1 --image Ubuntu2204 --instance-count 2 --zones 1 2 3 --generate-ssh-keys
-az vmss scale --resource-group rg1 --name vmss1 --new-capacity 4</pre></div>` },
+az vmss scale --resource-group rg1 --name vmss1 --new-capacity 4</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-virtual-machine-availability/" target="_blank" rel="noopener">Configure virtual machine availability</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/availability" target="_blank" rel="noopener">Availability options for Azure Virtual Machines</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview" target="_blank" rel="noopener">What are Virtual Machine Scale Sets?</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 9. A scale set that grows and shrinks</h3>
@@ -2494,7 +2626,20 @@ az containerapp revision list --resource-group rg1 --name app1 --output table</p
 <tr><td>Microservices with autoscaling, scale to zero, revisions and traffic splitting, without managing Kubernetes</td><td>Azure Container Apps</td></tr>
 <tr><td>Full control of Kubernetes itself</td><td>Azure Kubernetes Service, outside the current outline</td></tr>
 <tr><td>A web application in a container, with slots and custom domains</td><td>App Service, in the next lesson</td></tr>
-</tbody></table></div>` },
+</tbody></table></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-azure-container-instances/" target="_blank" rel="noopener">Configure Azure Container Instances</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/container-registry/container-registry-intro" target="_blank" rel="noopener">Introduction to Azure Container Registry</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/container-apps/overview" target="_blank" rel="noopener">Azure Container Apps overview</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/container-apps/scale-app" target="_blank" rel="noopener">Set scaling rules in Azure Container Apps</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 10. One container, two ways</h3>
@@ -2756,7 +2901,24 @@ az webapp create --resource-group rg1 --plan plan1 --name contoso-web-01 --runti
 az webapp deployment slot create --resource-group rg1 --name contoso-web-01 --slot staging
 az webapp deployment slot swap --resource-group rg1 --name contoso-web-01 --slot staging --target-slot production
 az appservice plan update --resource-group rg1 --name plan1 --sku P1V3
-az appservice plan update --resource-group rg1 --name plan1 --number-of-workers 3</pre></div>` },
+az appservice plan update --resource-group rg1 --name plan1 --number-of-workers 3</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-app-service-plans/" target="_blank" rel="noopener">Configure Azure App Service plans</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-azure-app-services/" target="_blank" rel="noopener">Configure Azure App Service</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans" target="_blank" rel="noopener">What are Azure App Service plans?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/deploy-staging-slots" target="_blank" rel="noopener">Set up staging environments (slots)</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-certificate" target="_blank" rel="noopener">Add and manage TLS/SSL certificates</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/app-service-web-tutorial-custom-domain" target="_blank" rel="noopener">Set up an existing custom domain</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/manage-backup" target="_blank" rel="noopener">Back up and restore an app</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/networking-features" target="_blank" rel="noopener">App Service networking features</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 11. A web app with a staging slot</h3>
@@ -3042,7 +3204,21 @@ az network vnet peering create --resource-group rg1 --name hub-to-spoke --vnet-n
 az network route-table create --resource-group rg1 --name rt-spoke
 az network route-table route create --resource-group rg1 --route-table-name rt-spoke --name to-internet --address-prefix 0.0.0.0/0 --next-hop-type VirtualAppliance --next-hop-ip-address 10.0.1.4
 az network vnet subnet update --resource-group rg1 --vnet-name vnet-spoke --name app --route-table rt-spoke
-az network nic show-effective-route-table --resource-group rg1 --name vm1-nic --output table</pre></div>` },
+az network nic show-effective-route-table --resource-group rg1 --name vm1-nic --output table</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-virtual-networks/" target="_blank" rel="noopener">Configure virtual networks</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-vnet-peering/" target="_blank" rel="noopener">Configure Azure Virtual Network peering</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/control-network-traffic-flow-with-routes/" target="_blank" rel="noopener">Manage and control traffic flow in your Azure deployment with routes</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-network-watcher/" target="_blank" rel="noopener">Introduction to Azure Network Watcher</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses" target="_blank" rel="noopener">Public IP addresses</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 12. Two networks, a peering and a route</h3>
@@ -3285,7 +3461,21 @@ az network nsg rule create --resource-group rg1 --nsg-name nsg-web --name allow-
 az network asg create --resource-group rg1 --name asg-web
 az network nic ip-config update --resource-group rg1 --nic-name vm1-nic --name ipconfig1 --application-security-groups asg-web
 az network vnet subnet update --resource-group rg1 --vnet-name vnet1 --name web --network-security-group nsg-web --service-endpoints Microsoft.Storage
-az network nic list-effective-nsg --resource-group rg1 --name vm1-nic</pre></div>` },
+az network nic list-effective-nsg --resource-group rg1 --name vm1-nic</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/configure-network-security-groups/" target="_blank" rel="noopener">Configure network security groups</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-network/application-security-groups" target="_blank" rel="noopener">Application security groups</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/bastion/bastion-overview" target="_blank" rel="noopener">What is Azure Bastion?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview" target="_blank" rel="noopener">Virtual network service endpoints</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview" target="_blank" rel="noopener">What is a private endpoint?</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 13. Filter, connect and go private</h3>
@@ -3523,7 +3713,21 @@ nslookup www.contoso.com ns1-01.azure-dns.com</pre></div>
 <div class="tabla"><pre>az network lb create --resource-group rg1 --name lb-web --sku Standard --public-ip-address pip-lb --frontend-ip-name fe --backend-pool-name be
 az network lb probe create --resource-group rg1 --lb-name lb-web --name http-probe --protocol Http --port 80 --path /
 az network lb rule create --resource-group rg1 --lb-name lb-web --name http --protocol Tcp --frontend-port 80 --backend-port 80 --frontend-ip-name fe --backend-pool-name be --probe-name http-probe
-az network nic ip-config address-pool add --resource-group rg1 --nic-name vm1-nic --ip-config-name ipconfig1 --lb-name lb-web --address-pool be</pre></div>` },
+az network nic ip-config address-pool add --resource-group rg1 --nic-name vm1-nic --ip-config-name ipconfig1 --lb-name lb-web --address-pool be</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/host-domain-azure-dns/" target="_blank" rel="noopener">Host your domain on Azure DNS</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-load-balancer/" target="_blank" rel="noopener">Introduction to Azure Load Balancer</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-application-gateway/" target="_blank" rel="noopener">Introduction to Azure Application Gateway</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-overview" target="_blank" rel="noopener">What is Azure Private DNS?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/troubleshoot/azure/load-balancer/troubleshoot-common-problems/load-balancer-troubleshoot" target="_blank" rel="noopener">Troubleshoot Azure Load Balancer common problems</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 14. A private zone and a load balancer</h3>
@@ -3795,7 +3999,24 @@ Event
 <div class="tabla"><pre>az monitor metrics list --resource VM_ID --metric "Percentage CPU" --interval PT5M
 az monitor diagnostic-settings create --name to-law --resource STORAGE_BLOB_SERVICE_ID --workspace WORKSPACE_ID --logs "[{category:StorageRead,enabled:true}]"
 az monitor action-group create --resource-group rg1 --name ag-ops --short-name ops --action email admin admin@contoso.com
-az monitor metrics alert create --resource-group rg1 --name cpu-high --scopes VM_ID --condition "avg Percentage CPU > 85" --window-size 15m --evaluation-frequency 5m --severity 2 --action ag-ops</pre></div>` },
+az monitor metrics alert create --resource-group rg1 --name cpu-high --scopes VM_ID --condition "avg Percentage CPU > 85" --window-size 15m --evaluation-frequency 5m --severity 2 --action ag-ops</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/monitor-azure-vm-using-diagnostic-data/" target="_blank" rel="noopener">Monitor your Azure virtual machines with Azure Monitor</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/write-first-query-kusto-query-language/" target="_blank" rel="noopener">Write your first query with Kusto Query Language</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-network-watcher/" target="_blank" rel="noopener">Introduction to Azure Network Watcher</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-overview" target="_blank" rel="noopener">What are Azure Monitor alerts?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-processing-rules" target="_blank" rel="noopener">Alert processing rules</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/data-collection/diagnostic-settings" target="_blank" rel="noopener">Diagnostic settings in Azure Monitor</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-tutorial" target="_blank" rel="noopener">Tutorial: use Log Analytics</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/network-watcher/connection-monitor-overview" target="_blank" rel="noopener">Connection monitor overview</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 15. From a metric to a message</h3>
@@ -4050,7 +4271,22 @@ LESSONS.push({
 az backup vault backup-properties set --resource-group rg1 --name rsv-weu --backup-storage-redundancy LocallyRedundant
 az backup protection enable-for-vm --resource-group rg1 --vault-name rsv-weu --vm vm1 --policy-name DefaultPolicy
 az backup protection backup-now --resource-group rg1 --vault-name rsv-weu --container-name vm1 --item-name vm1 --backup-management-type AzureIaasVM
-az backup job list --resource-group rg1 --vault-name rsv-weu --output table</pre></div>` },
+az backup job list --resource-group rg1 --vault-name rsv-weu --output table</pre></div>
+
+<h3>Go deeper on Microsoft Learn</h3>
+<p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
+<p><strong>Training modules</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/intro-to-azure-backup/" target="_blank" rel="noopener">Introduction to Azure Backup</a></li>
+<li><a href="https://learn.microsoft.com/en-us/training/modules/protect-virtual-machines-with-azure-backup/" target="_blank" rel="noopener">Protect your virtual machines by using Azure Backup</a></li>
+</ul>
+<p><strong>Documentation</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/backup/backup-vault-overview" target="_blank" rel="noopener">Backup vaults overview</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/backup/configure-reports" target="_blank" rel="noopener">Configure Azure Backup reports</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/site-recovery/azure-to-azure-tutorial-enable-replication" target="_blank" rel="noopener">Tutorial: set up disaster recovery for Azure VMs</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/site-recovery/azure-to-azure-tutorial-failover-failback" target="_blank" rel="noopener">Tutorial: fail over Azure VMs to a secondary region</a></li>
+</ul>` },
 
     { id: "lab", titulo: "Hands-on lab", html: R`
 <h3>Lab 16. Back up, restore a file, and test a failover</h3>
