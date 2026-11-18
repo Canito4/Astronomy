@@ -4289,7 +4289,7 @@ LESSONS.push({
 <ol>
 <li><strong>Day 1.</strong> Take the practice exam in this lesson in one sitting, with a 100-minute timer and no notes. Record the score per domain.</li>
 <li><strong>Days 2 to 7.</strong> For your two weakest domains, reread the cheat sheets, redo the exam questions of those lessons, and repeat the labs you skipped.</li>
-<li><strong>Day 8.</strong> Take Microsoft's free <strong>practice assessment</strong> for AZ-104 on Microsoft Learn. It is the best source of questions in the real style.</li>
+<li><strong>Day 8.</strong> Take Microsoft's free <strong>practice assessment</strong> for AZ-104, now hosted on AI Skills Navigator at <a href="http://aka.ms/AZ104-PA" target="_blank" rel="noopener">aka.ms/AZ104-PA</a>. It is the best source of questions in the real style. The older practice assessments on Microsoft Learn are no longer updated.</li>
 <li><strong>Days 9 to 12.</strong> Review the traps list above and the cheat sheets of all 18 lessons. Redo only the questions you got wrong.</li>
 <li><strong>Day 13.</strong> If you will sit the exam from home, run the system test of the exam provider and prepare a clean desk and identity document.</li>
 <li><strong>Day 14.</strong> Rest. A tired brain misreads qualifiers.</li>
@@ -4297,7 +4297,7 @@ LESSONS.push({
 <h3>Useful official resources</h3>
 <ul>
 <li>The AZ-104 <strong>study guide</strong>, with the current skills measured, on Microsoft Learn. Check it for changes before the exam.</li>
-<li>The <strong>practice assessment</strong>, free, on the AZ-104 certification page.</li>
+<li>The free <strong>practice assessment</strong> at <a href="http://aka.ms/AZ104-PA" target="_blank" rel="noopener">aka.ms/AZ104-PA</a>.</li>
 <li>The <strong>exam sandbox</strong>, to try the question formats.</li>
 <li>The official labs, at <code>microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator</code>, which these lessons followed.</li>
 </ul>
