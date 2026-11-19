@@ -21,17 +21,17 @@ window.AZ104 = {
     extra: R`<div class="card" style="margin:18px 0"><h3 style="margin-top:0">How this course was built</h3><p style="margin:0">The lesson list mirrors the official <a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104" target="_blank" rel="noopener">AZ-104 study guide</a>, bullet by bullet, and the labs follow Microsoft's own <a href="https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/" target="_blank" rel="noopener">AZ-104 lab exercises</a>. The questions are original and written in the style of the exam. They are not real exam questions. Azure changes every month, so when a lesson and Microsoft Learn disagree, Microsoft Learn wins.</p></div>`
   },
   fases: [
-    { n: 0, etiqueta: "Start", titulo: "Orientation", meta: "1 lesson · about 3 hours",
+    { n: 0, etiqueta: "Start", titulo: "Orientation", meta: "1 lesson · about 4 hours",
       resumen: "How the exam works, how Azure is organised, and the tools you will use in every lab.", proximas: [] },
-    { n: 1, etiqueta: "Domain 1 · 20–25%", titulo: "Manage Azure identities and governance", meta: "3 lessons · about 14 hours",
+    { n: 1, etiqueta: "Domain 1 · 20–25%", titulo: "Manage Azure identities and governance", meta: "3 lessons · about 17 hours",
       resumen: "Microsoft Entra users and groups, role-based access control, Azure Policy, locks, tags, subscriptions, management groups and cost control.", proximas: [] },
-    { n: 2, etiqueta: "Domain 2 · 15–20%", titulo: "Implement and manage storage", meta: "3 lessons · about 12 hours",
+    { n: 2, etiqueta: "Domain 2 · 15–20%", titulo: "Implement and manage storage", meta: "3 lessons · about 15 hours",
       resumen: "Storage accounts, redundancy, access keys and SAS tokens, firewalls, Blob Storage and Azure Files.", proximas: [] },
-    { n: 3, etiqueta: "Domain 3 · 20–25%", titulo: "Deploy and manage Azure compute resources", meta: "5 lessons · about 22 hours",
+    { n: 3, etiqueta: "Domain 3 · 20–25%", titulo: "Deploy and manage Azure compute resources", meta: "5 lessons · about 27 hours",
       resumen: "ARM templates and Bicep, virtual machines, availability and scale sets, containers and App Service.", proximas: [] },
-    { n: 4, etiqueta: "Domain 4 · 15–20%", titulo: "Implement and manage virtual networking", meta: "3 lessons · about 14 hours",
+    { n: 4, etiqueta: "Domain 4 · 15–20%", titulo: "Implement and manage virtual networking", meta: "3 lessons · about 17 hours",
       resumen: "Virtual networks, peering, routing, network security groups, Bastion, private access to PaaS, DNS and load balancing.", proximas: [] },
-    { n: 5, etiqueta: "Domain 5 · 10–15%", titulo: "Monitor and maintain Azure resources", meta: "2 lessons · about 10 hours",
+    { n: 5, etiqueta: "Domain 5 · 10–15%", titulo: "Monitor and maintain Azure resources", meta: "2 lessons · about 12 hours",
       resumen: "Azure Monitor metrics, logs and alerts, Network Watcher, Azure Backup and Site Recovery.", proximas: [] },
     { n: 6, etiqueta: "Finish", titulo: "Exam readiness", meta: "1 lesson · about 6 hours",
       resumen: "Exam technique and a full-length practice test across the five domains.", proximas: [] }
@@ -44,7 +44,7 @@ LESSONS.push({
   id: "az-1", n: 1, fase: 0, codigo: "",
   titulo: "The exam, the Azure hierarchy and your tools",
   sub: "What AZ-104 tests, how every Azure resource fits into one tree, and the four ways to give Azure an order.",
-  horas: "3 hours",
+  horas: "4 hours",
   contexto: "AZ-104 exam facts (100 minutes, pass mark 700 of 1000, five domains with weights, question types, Microsoft Learn available during the exam, annual free renewal). Azure hierarchy: Microsoft Entra tenant, management groups, subscriptions, resource groups, resources. Azure Resource Manager as the single control plane. Tools: Azure portal, Cloud Shell, Azure CLI, Azure PowerShell, ARM templates and Bicep. Regions, region pairs and availability zones. Free account and cost hygiene.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -133,7 +133,65 @@ LESSONS.push({
 <li>An <strong>availability zone</strong> is one or more datacentres inside a region with independent power, cooling and network. Regions that support zones have at least three.</li>
 <li>A <strong>region pair</strong> is two regions in the same geography, hundreds of kilometres apart, that Microsoft updates one after the other. Geo-redundant storage replicates to the paired region. North Europe and West Europe are a pair.</li>
 </ul>
-<p>Not every service or virtual machine size exists in every region. When a scenario says a deployment fails only in one region, think of availability and quota.</p>
+<p>Not every service or virtual machine size exists in every region. When a scenario says a deployment fails only in one region, think of availability and quota.</p>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part goes one level below the summary. Read it after "What you must know", when the basic picture is clear.</p>
+
+<h3>1. What happens when you press Create</h3>
+<p>Every portal click, CLI command, PowerShell cmdlet and template ends up as the same thing: an HTTPS request to <strong>Azure Resource Manager</strong> at <code>management.azure.com</code>. Knowing the order of the checks explains a surprising number of exam answers.</p>
+<ol>
+<li><strong>Authentication.</strong> Microsoft Entra ID issues a token for you, a group, an app or a managed identity. No token, no request.</li>
+<li><strong>Authorisation.</strong> Resource Manager checks your Azure RBAC role assignments at that scope. If no role allows the action, the answer is 403, <em>AuthorizationFailed</em>.</li>
+<li><strong>Azure Policy.</strong> If a policy with the Deny effect matches, the request is refused with <em>RequestDisallowedByPolicy</em>, even for an Owner.</li>
+<li><strong>Locks.</strong> A CanNotDelete or ReadOnly lock blocks the operation, even for an Owner.</li>
+<li><strong>Resource provider.</strong> The request is handed to the provider for that type, such as <code>Microsoft.Compute</code> for VMs. The provider checks quotas and capacity and creates the resource.</li>
+<li><strong>Activity log.</strong> The write is recorded with the caller, time and result.</li>
+</ol>
+<p>So when a question says "an Owner cannot delete a resource", think of a lock. When it says "a Contributor cannot create a VM in North Europe but can in West Europe", think of a policy. When it says "the deployment fails with a quota error", think of the provider and the regional vCPU quota.</p>
+
+<h3>2. Resource providers and quotas</h3>
+<ul>
+<li>Each service is a <strong>resource provider</strong> with a namespace: <code>Microsoft.Storage</code>, <code>Microsoft.Network</code>, <code>Microsoft.Web</code>. A subscription must be <strong>registered</strong> for a provider before using it. Most common ones register automatically. If you see "the subscription is not registered to use namespace", register it under Subscription, <strong>Resource providers</strong>, or with <code>az provider register --namespace Microsoft.ContainerInstance</code>.</li>
+<li>Subscriptions have <strong>quotas</strong>, for example the number of vCPUs per VM family per region. A free account has low quotas. You see them under Subscription, <strong>Usage + quotas</strong>, and you request an increase there. A quota is a limit on your subscription, not a statement that the hardware is unavailable.</li>
+</ul>
+
+<h3>3. Reading a resource ID</h3>
+<div class="tabla"><pre>/subscriptions/1111-2222/resourceGroups/rg-web/providers/Microsoft.Compute/virtualMachines/vm1
+ |              |              |              |                  |                |
+ subscription   ID             group          provider           type             name</pre></div>
+<p>Child resources add more pairs, as in <code>.../storageAccounts/stcontoso/blobServices/default/containers/logs</code>. Scopes for role assignments and policies are written the same way, cut at the level you want: a whole subscription is just <code>/subscriptions/1111-2222</code>.</p>
+
+<h3>4. Azure CLI and PowerShell side by side</h3>
+<div class="tabla"><table>
+<thead><tr><th>Task</th><th>Azure CLI</th><th>Azure PowerShell</th></tr></thead>
+<tbody>
+<tr><td>Sign in</td><td><code>az login</code></td><td><code>Connect-AzAccount</code></td></tr>
+<tr><td>Choose the subscription</td><td><code>az account set --subscription NAME</code></td><td><code>Set-AzContext -Subscription NAME</code></td></tr>
+<tr><td>Create a resource group</td><td><code>az group create --name rg1 --location westeurope</code></td><td><code>New-AzResourceGroup -Name rg1 -Location westeurope</code></td></tr>
+<tr><td>List VMs</td><td><code>az vm list --output table</code></td><td><code>Get-AzVM</code></td></tr>
+<tr><td>Delete a group</td><td><code>az group delete --name rg1</code></td><td><code>Remove-AzResourceGroup -Name rg1</code></td></tr>
+</tbody></table></div>
+<p>The pattern helps you guess commands you have never seen. The CLI is <em>az, noun, verb, then double-dash parameters</em>. PowerShell is <em>Verb-AzNoun, then single-dash parameters</em>, with verbs such as Get, New, Set, Remove, Start, Stop. Questions often show four commands where three have the wrong verb or a parameter from the other tool, such as <code>--ResourceGroupName</code>.</p>
+<ul>
+<li><code>--output table</code>, <code>json</code> or <code>tsv</code> changes the CLI's output format. <code>--query</code> filters it, for example <code>az vm list --query "[].name" --output tsv</code>.</li>
+<li>Cloud Shell runs in the browser with both tools installed and already signed in. It can keep your files in an Azure file share, or run as an ephemeral session with no storage.</li>
+</ul>
+
+<h3>5. Regions in more detail</h3>
+<ul>
+<li>Most regions are paired with another in the same geography, such as North Europe and West Europe. Pairs are used by geo-redundant storage and for staggered platform updates. Some newer regions have no pair.</li>
+<li>Not every service or VM size exists in every region, and prices differ between regions. A question saying "the size is not available" often has the answer "choose a different region or size".</li>
+<li>The location of a <strong>resource group</strong> only says where its metadata is stored. Resources in it can live in any region.</li>
+</ul>
+
+<h3>6. Studying with a free account</h3>
+<ul>
+<li>The Azure free account gives a credit for the first 30 days, then twelve months of some popular services within limits, plus services that are always free up to a level. After that you move to pay-as-you-go.</li>
+<li>Create a <strong>budget</strong> on your study subscription on the first day, with an email at a low amount. You will meet budgets properly in lesson 4.</li>
+<li>Build every lab in its own resource group and delete the group at the end. Deleting the group is the most reliable way to stop all charges.</li>
+<li>With 5 hours a week, a good rhythm is two short reading sessions and one long lab session. Repeat the exam questions of a lesson a week later, not the same day.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -241,7 +299,7 @@ LESSONS.push({
   id: "az-2", n: 2, fase: 1, codigo: "Entra ID",
   titulo: "Microsoft Entra users and groups",
   sub: "Creating and managing identities, licences, guests and self-service password reset.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Microsoft Entra ID (formerly Azure Active Directory): tenants, user types (member, guest), cloud-only and synchronised identities, creating users in the portal, in bulk, with the CLI and with Microsoft Graph PowerShell. Groups: security and Microsoft 365, membership types assigned, dynamic user and dynamic device (dynamic needs Entra ID P1). Licences: Free, P1, P2, usage location, group-based licensing. External users with B2B collaboration. Self-service password reset: scope none, selected or all, authentication methods, registration, writeback. Entra roles compared with Azure roles; administrative units.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -327,7 +385,94 @@ LESSONS.push({
 </ul>
 
 <h3>7. Administrative units</h3>
-<p>An administrative unit is a container of users, groups or devices inside the tenant. You assign an Entra role scoped to the unit, so that a help-desk technician in Madrid can reset passwords only for users in the Madrid unit. It needs P1 for the administrators. It is the Entra equivalent of delegating on an organisational unit.</p>
+<p>An administrative unit is a container of users, groups or devices inside the tenant. You assign an Entra role scoped to the unit, so that a help-desk technician in Madrid can reset passwords only for users in the Madrid unit. It needs P1 for the administrators. It is the Entra equivalent of delegating on an organisational unit.</p>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the details the exam likes to test about identities: what each licence unlocks, how dynamic groups are written, where users come from, and the settings that control guests and password reset.</p>
+
+<h3>1. Editions and what they unlock</h3>
+<div class="tabla"><table>
+<thead><tr><th>Feature</th><th>Free</th><th>P1</th><th>P2</th></tr></thead>
+<tbody>
+<tr><td>Users, groups, basic reports</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Self-service password reset for cloud users</td><td>No (included in some Microsoft 365 plans)</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Dynamic membership groups</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Group-based licence assignment</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Conditional Access</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Password writeback to on-premises AD</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Privileged Identity Management, Identity Protection</td><td>No</td><td>No</td><td>Yes</td></tr>
+</tbody></table></div>
+<p>When an exam answer mentions dynamic groups, Conditional Access or group-based licensing, check that the scenario has at least P1. PIM and risk-based policies need P2.</p>
+
+<h3>2. Where users come from</h3>
+<ul>
+<li><strong>Cloud-only users</strong> are created in Entra ID, by hand, by bulk upload of a CSV template in the portal, or by script.</li>
+<li><strong>Synchronised users</strong> come from an on-premises Active Directory through <strong>Microsoft Entra Connect Sync</strong> or <strong>Cloud Sync</strong>. Most of their properties, such as name and department, must be changed on premises: in the portal they appear read-only.</li>
+<li><strong>Guests</strong> are invited from another organisation or a personal account. Their user type is Guest.</li>
+<li>A deleted user stays in <strong>Deleted users</strong> for 30 days and can be restored with its group memberships and licences. After that it is gone for good.</li>
+</ul>
+<div class="tabla"><pre>az ad user create --display-name "Ana Ruiz" --user-principal-name ana@contoso.onmicrosoft.com --password "TEMPORARY-PASSWORD" --force-change-password-next-sign-in true
+az ad group create --display-name "IT Lab Admins" --mail-nickname itlabadmins
+az ad group member add --group "IT Lab Admins" --member-id USER_OBJECT_ID
+
+# PowerShell uses the Microsoft Graph module. The old AzureAD and MSOnline modules are retired.
+New-MgUser -DisplayName "Ana Ruiz" -UserPrincipalName ana@contoso.onmicrosoft.com -AccountEnabled -MailNickname ana -PasswordProfile PROFILE</pre></div>
+
+<h3>3. Groups in more detail</h3>
+<div class="tabla"><table>
+<thead><tr><th>Group type</th><th>Membership options</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td><strong>Security</strong></td><td>Assigned, dynamic user, dynamic device</td><td>Access to resources, RBAC roles, licences, policies</td></tr>
+<tr><td><strong>Microsoft 365</strong></td><td>Assigned, dynamic user. No devices</td><td>Collaboration: shared mailbox, calendar, files, Teams</td></tr>
+</tbody></table></div>
+<p>A dynamic rule is an expression on user or device attributes:</p>
+<div class="tabla"><pre>user.department -eq "Sales"
+(user.country -eq "Spain") -and (user.jobTitle -contains "Engineer")
+user.userType -eq "Guest"
+device.deviceOSType -eq "Windows"</pre></div>
+<ul>
+<li>You cannot add or remove members of a dynamic group by hand. Change the attribute instead.</li>
+<li>A group is either users or devices, never both.</li>
+<li>Changing an existing group from assigned to dynamic replaces its members with the result of the rule.</li>
+<li>A group must be marked <strong>role-assignable</strong> at creation if you want to give it a Microsoft Entra role. This cannot be changed later, and such groups cannot be dynamic.</li>
+<li>Group <strong>owners</strong> can manage membership without being administrators.</li>
+</ul>
+
+<h3>4. Licences, step by step</h3>
+<ol>
+<li>Set the user's <strong>usage location</strong>, the country where the service is used. A licence cannot be assigned without it. This is one of the most tested details.</li>
+<li>Assign the licence directly to the user, or to a group, which needs P1. With group-based licensing, members get the licence when they join and lose it when they leave.</li>
+<li>Choose which service plans inside the licence are enabled, for example a Microsoft 365 licence without one of its apps.</li>
+</ol>
+<ul>
+<li>If there are not enough licences, group-based assignment fails for some users and the group shows an error state.</li>
+<li>Group-based licensing does not apply through nested groups: only direct members of the licensed group receive it.</li>
+</ul>
+
+<h3>5. Controlling guests</h3>
+<ul>
+<li>Under <strong>External Identities</strong>, <strong>External collaboration settings</strong>, you choose <em>who can invite</em> guests (everyone, members, only admins and the Guest Inviter role, or no one) and <em>which domains</em> are allowed or blocked.</li>
+<li>Guests have restricted default permissions: they cannot browse the directory's users and groups like members can.</li>
+<li>An invited guest must <strong>redeem</strong> the invitation before signing in. Until then the account shows the invitation as pending.</li>
+<li>Guests receive Azure access exactly like members: through RBAC role assignments.</li>
+</ul>
+
+<h3>6. Self-service password reset, the settings</h3>
+<div class="tabla"><table>
+<thead><tr><th>Setting</th><th>Options</th></tr></thead>
+<tbody>
+<tr><td>Enabled for</td><td>None, Selected (one group), All</td></tr>
+<tr><td>Number of methods required</td><td>1 or 2</td></tr>
+<tr><td>Methods</td><td>Mobile app notification or code, email, mobile phone, office phone, security questions</td></tr>
+<tr><td>Registration</td><td>Require users to register at sign-in, and ask them to reconfirm every N days</td></tr>
+<tr><td>Notifications</td><td>Notify users on reset, notify admins when another admin resets</td></tr>
+<tr><td>On-premises integration</td><td>Password writeback, through Entra Connect or Cloud Sync</td></tr>
+</tbody></table></div>
+<ul>
+<li>Administrators always get a stricter policy, defined by Microsoft: two methods, and no security questions. You cannot weaken it.</li>
+<li>To pilot SSPR, choose <strong>Selected</strong> with one test group, then switch to All.</li>
+<li>Synchronised users can only reset a password that will be valid on premises if <strong>writeback</strong> is enabled.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -463,7 +608,7 @@ LESSONS.push({
   id: "az-3", n: 3, fase: 1, codigo: "RBAC",
   titulo: "Access to Azure resources with RBAC",
   sub: "Role definitions, assignments and scopes, and how to work out what a user can really do.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Azure role-based access control: security principal (user, group, service principal, managed identity), role definition (Actions, NotActions, DataActions, NotDataActions, AssignableScopes), scope (management group, subscription, resource group, resource). Built-in roles: Owner, Contributor, Reader, User Access Administrator, Role Based Access Control Administrator, and resource-specific roles such as Virtual Machine Contributor and Storage Blob Data Reader. Inheritance, additive model, deny assignments. Control plane and data plane. Custom roles. Check access and effective permissions. Commands az role assignment create and New-AzRoleAssignment. Limits: 4000 role assignments per subscription.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -563,7 +708,90 @@ New-AzRoleAssignment -SignInName ana@contoso.com -RoleDefinitionName "Virtual Ma
 <li>A <strong>service principal</strong> is the identity of an application in the tenant.</li>
 <li>A <strong>managed identity</strong> is a service principal that Azure creates and rotates for a resource, so that no password is stored anywhere. <em>System-assigned</em> lives and dies with one resource. <em>User-assigned</em> is a separate resource that several resources can share.</li>
 </ul>
-<p>Both receive role assignments exactly like users do. When a scenario says a virtual machine must read from a storage account without storing credentials, the answer is a managed identity plus a role assignment.</p>
+<p>Both receive role assignments exactly like users do. When a scenario says a virtual machine must read from a storage account without storing credentials, the answer is a managed identity plus a role assignment.</p>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part shows what a role really is inside, how permissions combine, and how to read a role definition the way the exam shows it.</p>
+
+<h3>1. Inside a role definition</h3>
+<div class="tabla"><pre>{
+  "Name": "Virtual Machine Operator",
+  "IsCustom": true,
+  "Description": "Start, restart and stop VMs, nothing else",
+  "Actions": [
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/virtualMachines/start/action",
+    "Microsoft.Compute/virtualMachines/restart/action",
+    "Microsoft.Compute/virtualMachines/deallocate/action",
+    "Microsoft.Resources/subscriptions/resourceGroups/read"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [ "/subscriptions/1111-2222" ]
+}</pre></div>
+<ul>
+<li><strong>Actions</strong> are control plane operations, written as <em>provider/type/operation</em>. The wildcard <code>*</code> means everything: Contributor has <code>"*"</code>.</li>
+<li><strong>NotActions</strong> are subtracted from Actions in <em>this role only</em>. It is not a deny. Contributor has NotActions for <code>Microsoft.Authorization/*/Write</code> and <code>Delete</code>, which is why it cannot assign roles. If the same user gets Owner from another assignment, the NotActions of Contributor do not stop them.</li>
+<li><strong>DataActions</strong> and <strong>NotDataActions</strong> do the same for the data plane, for example <code>Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read</code>.</li>
+<li><strong>AssignableScopes</strong> lists where a custom role can be assigned. A custom role can be shared across subscriptions by listing them, or by using a management group.</li>
+</ul>
+
+<h3>2. How permissions combine</h3>
+<ul>
+<li>Your effective permissions are the <strong>union</strong> of all role assignments that apply to you, directly or through groups, at the scope or above it.</li>
+<li>There is no "most restrictive wins". Reader at the subscription plus Contributor on one group means Contributor on that group.</li>
+<li>The only real block is a <strong>deny assignment</strong>. You cannot create them yourself. They are created by Azure for some managed applications and deployment stacks.</li>
+<li>Policies and locks are separate from RBAC. They can stop an action that RBAC allows.</li>
+<li>A new assignment can take a few minutes to take effect. If a user still sees "no access", ask them to sign out and in again.</li>
+</ul>
+
+<h3>3. A worked interpretation</h3>
+<p>The exam often shows a table of assignments and asks what someone can do. Work it like this:</p>
+<div class="tabla"><table>
+<thead><tr><th>Principal</th><th>Role</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>Group Developers</td><td>Contributor</td><td>RG-Dev</td></tr>
+<tr><td>User Ana, member of Developers</td><td>Reader</td><td>Subscription</td></tr>
+<tr><td>User Ana</td><td>Storage Blob Data Reader</td><td>Storage account stlogs, in RG-Prod</td></tr>
+</tbody></table></div>
+<ol>
+<li>List every scope involved: subscription, RG-Dev, RG-Prod, stlogs.</li>
+<li>For each scope, collect the roles that reach it from above: in RG-Dev Ana has Reader and Contributor; in RG-Prod only Reader; on stlogs Reader plus Storage Blob Data Reader.</li>
+<li>Answer each statement: Ana can create a VM in RG-Dev (yes). Ana can delete stlogs (no, only Reader there). Ana can read blobs in stlogs with her Entra account (yes, through the data role). Ana can give Ben Reader on RG-Dev (no, Contributor cannot assign roles).</li>
+</ol>
+
+<h3>4. The roles that manage access</h3>
+<div class="tabla"><table>
+<thead><tr><th>Role</th><th>Manages resources</th><th>Assigns roles</th></tr></thead>
+<tbody>
+<tr><td>Owner</td><td>Yes</td><td>Yes, any role</td></tr>
+<tr><td>User Access Administrator</td><td>No</td><td>Yes, any role</td></tr>
+<tr><td>Role Based Access Control Administrator</td><td>No</td><td>Yes, and can be limited by a <strong>condition</strong> to certain roles or principals</td></tr>
+<tr><td>Contributor</td><td>Yes</td><td>No</td></tr>
+</tbody></table></div>
+<p>A Global Administrator in Entra ID has no Azure access by default. They can switch on <strong>Access management for Azure resources</strong> in the tenant properties, which gives them User Access Administrator at the root scope, then assign themselves what they need. Use it to recover access, then switch it off.</p>
+
+<h3>5. Managed identities in practice</h3>
+<ul>
+<li>A <strong>system-assigned</strong> identity is created with one resource, such as a VM, and deleted with it.</li>
+<li>A <strong>user-assigned</strong> identity is its own resource. Several VMs or apps can share it, and it survives when they are deleted.</li>
+<li>Typical scenario: a VM must read blobs. Enable its managed identity and assign <strong>Storage Blob Data Reader</strong> on the container or account. No keys or passwords are stored on the VM.</li>
+<li>Managed identities are service principals managed by Azure. You assign roles to them like any other principal.</li>
+</ul>
+
+<h3>6. Commands to recognise</h3>
+<div class="tabla"><pre>az role assignment create --assignee ana@contoso.com --role "Reader" --scope /subscriptions/1111-2222/resourceGroups/RG-Dev
+az role assignment list --assignee ana@contoso.com --all --include-inherited --output table
+az role definition list --name "Contributor"
+az role definition create --role-definition vm-operator.json
+
+New-AzRoleAssignment -SignInName ana@contoso.com -RoleDefinitionName "Reader" -ResourceGroupName RG-Dev
+Get-AzRoleAssignment -SignInName ana@contoso.com</pre></div>
+<ul>
+<li>Limits worth knowing: up to 4,000 role assignments per subscription, and up to 5,000 custom roles per tenant. Assign to <strong>groups</strong> rather than users to stay well below them.</li>
+<li><strong>Privileged Identity Management</strong>, with P2, makes a role <em>eligible</em> instead of permanent: the user activates it for a few hours when needed, with approval and justification.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -682,7 +910,7 @@ LESSONS.push({
   id: "az-4", n: 4, fase: 1, codigo: "Governance",
   titulo: "Subscriptions, policy, locks, tags and cost",
   sub: "Keeping an Azure estate organised, compliant and within budget.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Management groups (root, six levels, one parent), subscriptions, resource groups and moving resources. Azure Policy: definitions, initiatives, assignments, exclusions and exemptions; effects Deny, Audit, Append, Modify, DeployIfNotExists, AuditIfNotExists, Disabled; remediation tasks with managed identity; compliance. Resource locks CanNotDelete and ReadOnly, inherited, applied to the control plane. Tags: not inherited, 50 per resource, enforced or inherited with policy. Cost Management: cost analysis, budgets and alerts with action groups, Azure Advisor recommendations, reservations and Azure Hybrid Benefit. Policy compared with RBAC.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -774,6 +1002,91 @@ LESSONS.push({
 <li><strong>Reservations</strong> commit to one or three years of a resource for a discount. <strong>Azure Hybrid Benefit</strong> reuses Windows Server and SQL Server licences you already own. <strong>Spot</strong> virtual machines use spare capacity at a large discount and can be evicted at any time.</li>
 <li>The <strong>pricing calculator</strong> estimates the cost of a design before you deploy it.</li>
 <li>A <em>stopped</em> virtual machine is still billed for compute. It must be <em>stopped (deallocated)</em> for the compute charge to end. Disks are billed either way.</li>
+</ul>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the mechanics of governance: how policy is evaluated and fixed, the exact behaviour of locks, tag rules and limits, and how cost tools fit together.</p>
+
+<h3>1. Management groups, the numbers</h3>
+<ul>
+<li>Every tenant has one <strong>root management group</strong>. All management groups and subscriptions sit below it.</li>
+<li>The tree can be up to <strong>six levels deep</strong>, not counting the root and the subscriptions.</li>
+<li>Each management group and each subscription has exactly <strong>one parent</strong>.</li>
+<li>Moving a subscription to another management group needs rights on the subscription and on the target group.</li>
+<li>Role assignments and policies at a management group flow down to every subscription below it, including subscriptions added later.</li>
+</ul>
+
+<h3>2. Azure Policy in depth</h3>
+<p>The vocabulary first: a <strong>definition</strong> is one rule; an <strong>initiative</strong> is a set of definitions assigned together; an <strong>assignment</strong> applies a definition or initiative to a scope, with parameter values; an <strong>exclusion</strong> removes a child scope at assignment time; an <strong>exemption</strong> removes a specific resource or scope later, with a reason and an optional expiry.</p>
+<div class="tabla"><pre>{
+  "if": {
+    "allOf": [
+      { "field": "type", "equals": "Microsoft.Storage/storageAccounts" },
+      { "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly", "notEquals": "true" }
+    ]
+  },
+  "then": { "effect": "deny" }
+}</pre></div>
+<div class="tabla"><table>
+<thead><tr><th>Effect</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Deny</strong></td><td>Refuses the create or update request</td></tr>
+<tr><td><strong>Audit</strong></td><td>Allows it and marks the resource non-compliant</td></tr>
+<tr><td><strong>Append</strong></td><td>Adds fields to the request, for example an IP rule</td></tr>
+<tr><td><strong>Modify</strong></td><td>Adds, replaces or removes tags and some properties. Needs a managed identity</td></tr>
+<tr><td><strong>AuditIfNotExists</strong></td><td>Marks non-compliant if a related resource is missing, such as an extension on a VM</td></tr>
+<tr><td><strong>DeployIfNotExists</strong></td><td>Deploys the missing related resource. Needs a managed identity</td></tr>
+<tr><td><strong>DenyAction</strong></td><td>Blocks a specific action, such as delete, on matching resources</td></tr>
+<tr><td><strong>Disabled</strong></td><td>Switches the rule off, useful through a parameter</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>When is compliance evaluated?</strong> On every create or update; about half an hour after a new assignment; in a full scan every 24 hours; or on demand with <code>az policy state trigger-scan</code>.</li>
+<li><strong>Remediation.</strong> Modify and DeployIfNotExists act automatically on new and updated resources. For resources that already exist you start a <strong>remediation task</strong>. The assignment's managed identity must have the roles needed to make the change, such as Tag Contributor or Contributor.</li>
+<li>Built-in policies to recognise by name: <em>Allowed locations</em>, <em>Allowed virtual machine size SKUs</em>, <em>Allowed resource types</em>, <em>Require a tag on resources</em>, <em>Inherit a tag from the resource group</em>, <em>Not allowed resource types</em>.</li>
+</ul>
+
+<h3>3. Locks, the exact behaviour</h3>
+<ul>
+<li>A lock at a scope applies to everything below it. The most restrictive lock in the chain wins.</li>
+<li>To create or delete a lock you need <code>Microsoft.Authorization/locks/*</code>, which <strong>Owner</strong> and <strong>User Access Administrator</strong> have. Contributor does not.</li>
+<li>A <strong>CanNotDelete</strong> lock on a resource group prevents deleting the group <em>and</em> any resource in it, but you can still create and modify resources.</li>
+<li>A <strong>ReadOnly</strong> lock blocks every write, and some operations that look like reads but are implemented as POST: listing storage account keys, and starting or restarting VMs in a locked resource group.</li>
+<li>Locks protect the <strong>control plane</strong> only. A lock on a storage account does not stop someone deleting blobs with a SAS token. Use soft delete or immutability for data.</li>
+<li>To delete a locked resource: remove the lock first, then delete.</li>
+</ul>
+
+<h3>4. Tags, the rules</h3>
+<ul>
+<li>Up to <strong>50</strong> tag name and value pairs per resource, resource group or subscription.</li>
+<li>Tag names up to 512 characters (128 for storage accounts), values up to 256.</li>
+<li>Not every resource type supports tags, and some characters are not allowed in tag names for some types.</li>
+<li>Tags do not flow down by default. Use <em>Inherit a tag from the resource group</em> or <em>from the subscription</em>, with remediation for existing resources.</li>
+<li>Tags appear in cost analysis for usage <em>after</em> they are applied. They do not rewrite past costs.</li>
+<li>Assigning tags needs write access on the resource, or the <strong>Tag Contributor</strong> role, which changes tags without other access.</li>
+</ul>
+
+<h3>5. Moving resources</h3>
+<ul>
+<li>Resources can be moved between resource groups and between subscriptions in the same tenant. Not every resource type supports moving. Azure validates the move first.</li>
+<li>The region never changes in such a move. Moving across regions is a different process, often with Azure Resource Mover, as lesson 9 explains.</li>
+<li>A resource group can be renamed only by creating a new one and moving the resources into it.</li>
+</ul>
+
+<h3>6. Costs, how the tools fit</h3>
+<div class="tabla"><table>
+<thead><tr><th>Tool</th><th>Question it answers</th></tr></thead>
+<tbody>
+<tr><td><strong>Pricing calculator</strong></td><td>What will this design cost before I build it?</td></tr>
+<tr><td><strong>Cost analysis</strong></td><td>What did I spend, grouped by service, resource group, tag or location?</td></tr>
+<tr><td><strong>Budgets</strong></td><td>Tell me when actual or forecast spending crosses a percentage of an amount</td></tr>
+<tr><td><strong>Cost alerts</strong></td><td>Budget alerts, credit alerts, department quota alerts and anomaly alerts</td></tr>
+<tr><td><strong>Azure Advisor</strong></td><td>What should I change? Recommendations in five categories: Cost, Security, Reliability, Operational excellence, Performance</td></tr>
+</tbody></table></div>
+<ul>
+<li>A budget alert can trigger an <strong>action group</strong>, and the action group can run automation, for example a runbook that deallocates VMs. The budget itself never stops anything.</li>
+<li>Budgets can be set at management group, subscription or resource group scope, with filters by tag or service.</li>
+<li>Typical Advisor cost advice: resize or shut down underused VMs, buy <strong>reservations</strong> or a <strong>savings plan</strong> for steady workloads, delete unattached disks and unused public IPs.</li>
+<li><strong>Azure Hybrid Benefit</strong> lets you reuse your Windows Server or SQL Server licences to pay less for VMs.</li>
 </ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
@@ -922,7 +1235,7 @@ LESSONS.push({
   id: "az-5", n: 5, fase: 2, codigo: "Storage accounts",
   titulo: "Storage accounts, redundancy and encryption",
   sub: "Choosing the right kind of account, deciding how many copies of the data exist and where, and moving data in and out.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Storage account kinds: Standard general-purpose v2, Premium block blobs, Premium file shares, Premium page blobs. Naming rules and endpoints. Redundancy: LRS, ZRS, GRS, GZRS, RA-GRS, RA-GZRS; failover to the secondary region; which changes are possible after creation. Object replication for block blobs (needs versioning on both accounts and change feed on the source). Encryption at rest: always on, Microsoft-managed or customer-managed keys in Key Vault, encryption scopes, infrastructure encryption only at creation. Secure transfer and minimum TLS. Tools: Storage Explorer, storage browser, AzCopy (copy, sync, login, SAS), Import/Export and Data Box.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -1012,6 +1325,79 @@ azcopy sync "C:\data" "https://ACCOUNT.blob.core.windows.net/container1"</pre></
 <li>A copy between two accounts goes directly from server to server. The data does not pass through your computer.</li>
 <li><code>copy</code> transfers everything. <code>sync</code> transfers only what differs, and with <code>--delete-destination</code> it also removes what no longer exists in the source.</li>
 <li>AzCopy works with Blob Storage and Azure Files.</li>
+</ul>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds what you choose when creating an account, what can and cannot be changed afterwards, how failover really works, and the finer points of encryption and data movement.</p>
+
+<h3>1. The creation wizard, tab by tab</h3>
+<div class="tabla"><table>
+<thead><tr><th>Tab</th><th>Setting</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td>Basics</td><td>Name, region, performance, redundancy</td><td>Name: 3 to 24 lowercase letters and digits, unique worldwide. Performance cannot be changed later</td></tr>
+<tr><td>Advanced</td><td>Require secure transfer, minimum TLS version, allow anonymous blob access, allow storage account key access, hierarchical namespace, default access tier, large file shares, infrastructure encryption</td><td>Security defaults and features. Infrastructure encryption can only be chosen here</td></tr>
+<tr><td>Networking</td><td>Public access from all networks, selected networks, or disabled; private endpoints; routing preference</td><td>The storage firewall of the next lesson</td></tr>
+<tr><td>Data protection</td><td>Soft delete, versioning, change feed, point-in-time restore</td><td>Lesson 7</td></tr>
+<tr><td>Encryption</td><td>Microsoft-managed or customer-managed keys, encryption scopes</td><td>Section 4 below</td></tr>
+</tbody></table></div>
+
+<h3>2. What you can change later</h3>
+<div class="tabla"><table>
+<thead><tr><th>Change</th><th>Possible?</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Standard to Premium, or the reverse</td><td>No</td><td>Create a new account and copy the data</td></tr>
+<tr><td>General-purpose v1 to v2</td><td>Yes, one way</td><td>Upgrade in Configuration. You cannot go back</td></tr>
+<tr><td>LRS to GRS or RA-GRS, and back</td><td>Yes</td><td>Change the redundancy in Configuration</td></tr>
+<tr><td>LRS to ZRS, or GRS to GZRS</td><td>Yes, with a conversion</td><td>Request a conversion from the Redundancy page. It runs in the background and is not instant</td></tr>
+<tr><td>Region of the account</td><td>No</td><td>Copy the data to a new account in the target region</td></tr>
+<tr><td>Name</td><td>No</td><td>New account</td></tr>
+</tbody></table></div>
+
+<h3>3. Geo-redundancy and failover</h3>
+<ul>
+<li>Replication to the secondary region is <strong>asynchronous</strong>. The property <strong>Last Sync Time</strong> tells you up to which moment the secondary is guaranteed to have the data. Writes after that moment would be lost in a failover.</li>
+<li>With RA-GRS or RA-GZRS, the secondary is readable at <code>ACCOUNT-secondary.blob.core.windows.net</code>. Applications must be written to use it.</li>
+<li>If the primary region has a problem you can start a <strong>customer-managed failover</strong>. The secondary becomes the primary, DNS is updated, and the account becomes <strong>LRS</strong> in the new region. You must reconfigure geo-redundancy afterwards, which copies everything again and costs money.</li>
+<li>A <strong>planned failover</strong> also exists for tests and planned moves. It waits for synchronisation, so no data is lost.</li>
+<li>Microsoft may also fail over for you after a large regional disaster, but you should not count on it for your own recovery plan.</li>
+</ul>
+<p>Durability figures, for orientation: LRS keeps 3 copies in one datacentre; ZRS 3 copies in 3 zones; GRS and GZRS add 3 more in the paired region, 6 in total. Microsoft quotes at least eleven nines of durability per year for LRS and more for the others.</p>
+
+<h3>4. Encryption in more detail</h3>
+<ul>
+<li>All data is encrypted at rest with AES-256. You choose only <strong>who manages the key</strong>.</li>
+<li><strong>Microsoft-managed keys</strong>: nothing to do.</li>
+<li><strong>Customer-managed keys</strong>: the key lives in <strong>Azure Key Vault</strong> or Managed HSM. Requirements: the vault must have <strong>soft delete</strong> and <strong>purge protection</strong> enabled; the storage account uses a <strong>managed identity</strong> that needs the role <em>Key Vault Crypto Service Encryption User</em>, or the equivalent access policy, on the key.</li>
+<li>If you point to the key without a version, Azure Storage picks up new key versions automatically, so <strong>rotation</strong> needs no change on the account.</li>
+<li>If the key is disabled or deleted, the data becomes inaccessible until access is restored. That is the point of customer-managed keys: you can cut access.</li>
+<li><strong>Customer-provided keys</strong>: the client sends the key with each Blob Storage request. Azure never stores it.</li>
+<li><strong>Encryption scopes</strong> let different containers or blobs in one account use different keys, for example one per customer.</li>
+<li><strong>Infrastructure encryption</strong> adds a second layer of encryption with a different algorithm and key. It must be enabled when the account is created.</li>
+</ul>
+
+<h3>5. Object replication in more detail</h3>
+<ul>
+<li>A <strong>replication policy</strong> links a source account to a destination account and contains <strong>rules</strong>, each from one source container to one destination container, optionally filtered by name prefix.</li>
+<li>It copies <strong>block blobs</strong> asynchronously. The accounts can be in different regions and subscriptions, and even different tenants unless that is disallowed.</li>
+<li>Requirements: <strong>versioning</strong> on both accounts and <strong>change feed</strong> on the source. Not supported on accounts with hierarchical namespace.</li>
+<li>The destination container becomes read-only for writes while the policy exists. Blobs in the archive tier are not replicated.</li>
+<li>Typical uses: lower read latency for users in another region, processing data in a separate account, or keeping a copy for compliance. It is not a backup: deletions and overwrites are replicated too.</li>
+</ul>
+
+<h3>6. AzCopy and Storage Explorer in practice</h3>
+<div class="tabla"><pre>azcopy login                                   # sign in with Microsoft Entra ID
+azcopy make "https://ACCOUNT.blob.core.windows.net/backups"
+azcopy copy "C:\data" "https://ACCOUNT.blob.core.windows.net/backups" --recursive
+azcopy copy "https://SRC.blob.core.windows.net/c1?SAS" "https://DST.blob.core.windows.net/c1?SAS" --recursive
+azcopy sync "C:\data" "https://ACCOUNT.blob.core.windows.net/backups" --delete-destination=true
+azcopy jobs list
+azcopy jobs resume JOB_ID</pre></div>
+<ul>
+<li>AzCopy authenticates with <strong>Microsoft Entra ID</strong>, which needs a data role such as <em>Storage Blob Data Contributor</em>, or with a <strong>SAS token</strong> appended to the URL. Account keys are not accepted on the command line for Blob Storage.</li>
+<li><code>copy</code> copies; <code>sync</code> makes the destination match the source and can delete extra files. Copies between accounts run server to server, without passing through your machine.</li>
+<li>Interrupted jobs can be <strong>resumed</strong>.</li>
+<li><strong>Azure Storage Explorer</strong> is a free desktop application for Windows, macOS and Linux. It connects with an Entra account, an access key, a SAS or a connection string, and lets you browse, upload, download, set tiers, manage snapshots and generate SAS tokens. It uses AzCopy underneath for transfers.</li>
+<li>For tens of terabytes over a slow link, the offline options are <strong>Azure Data Box</strong> devices shipped to you, and the <strong>Import/Export</strong> service with your own disks.</li>
 </ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
@@ -1158,7 +1544,7 @@ LESSONS.push({
   id: "az-6", n: 6, fase: 2, codigo: "Storage access",
   titulo: "Securing access to storage",
   sub: "Access keys, shared access signatures, stored access policies, the storage firewall and identity-based access to file shares.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Authorisation options for storage: Shared Key with the two account access keys, shared access signatures (user delegation SAS, service SAS, account SAS), Microsoft Entra ID with data roles, anonymous access. Key rotation and disabling Shared Key. SAS parameters: permissions, start and expiry, allowed IP, protocol, signature. Stored access policies: up to five per container, used to change or revoke a service SAS. Storage firewall: public network access enabled, selected networks, disabled; virtual network rules with service endpoints, public IP rules, trusted Microsoft services exception, private endpoints. Azure Files identity-based authentication over SMB: on-premises AD DS, Microsoft Entra Domain Services, Microsoft Entra Kerberos; share-level roles and NTFS permissions.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -1253,7 +1639,91 @@ LESSONS.push({
 <li><strong>Share level,</strong> with Azure roles: <em>Storage File Data SMB Share Reader</em> (read), <em>Contributor</em> (read, write, delete) and <em>Elevated Contributor</em> (the same, plus changing NTFS permissions).</li>
 <li><strong>File and directory level,</strong> with ordinary Windows NTFS permissions.</li>
 </ol>
-<p>Other facts: SMB uses TCP port <strong>445</strong>, which many internet providers block outbound. Mounting with the storage account key always works and gives full control, which is why it is kept for administrators. Identity-based authentication does not apply to NFS shares.</p>
+<p>Other facts: SMB uses TCP port <strong>445</strong>, which many internet providers block outbound. Mounting with the storage account key always works and gives full control, which is why it is kept for administrators. Identity-based authentication does not apply to NFS shares.</p>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds how to rotate keys safely, what each part of a SAS URL means, the data roles for Entra access, and the exact behaviour of the storage firewall and of identity-based access to file shares.</p>
+
+<h3>1. Rotating access keys without downtime</h3>
+<ol>
+<li>Applications use <strong>key1</strong>.</li>
+<li>Change the applications to use <strong>key2</strong>.</li>
+<li><strong>Regenerate key1</strong>. Anything still using the old key1 stops working.</li>
+<li>Next time, move applications back to key1 and regenerate key2.</li>
+</ol>
+<ul>
+<li>Regenerating a key also <strong>invalidates every account SAS and service SAS signed with it</strong>. That is the emergency way to revoke them.</li>
+<li>A <strong>key expiration policy</strong> on the account reminds you to rotate after a number of days.</li>
+<li>Better still, keep keys in <strong>Key Vault</strong>, or avoid them entirely with Entra ID.</li>
+<li>Setting <strong>Allow storage account key access</strong> to Disabled blocks Shared Key authorisation <em>and</em> every SAS signed with a key. Only Entra ID and user delegation SAS keep working.</li>
+</ul>
+
+<h3>2. Reading a SAS URL</h3>
+<div class="tabla"><pre>https://stcontoso.blob.core.windows.net/reports/q1.pdf
+  ?sv=2022-11-02          signed version of the API
+  &amp;sr=b                    resource: b = blob, c = container
+  &amp;sp=r                    permissions: r read, w write, d delete, l list, a add, c create
+  &amp;st=2026-11-20T08:00Z    start time
+  &amp;se=2026-11-20T18:00Z    expiry time
+  &amp;sip=203.0.113.0-203.0.113.255   allowed client IP range
+  &amp;spr=https               HTTPS only
+  &amp;sig=...                 signature, computed with the key</pre></div>
+<ul>
+<li>An <strong>account SAS</strong> also has <code>ss</code> (services: b, f, q, t) and <code>srt</code> (resource types: s service, c container, o object).</li>
+<li>A <strong>user delegation SAS</strong> has extra fields identifying the Entra user whose delegation key signed it. It works only for Blob Storage and lasts at most 7 days.</li>
+<li>A SAS tied to a <strong>stored access policy</strong> has <code>si=POLICYNAME</code>, and its permissions or times may come from the policy instead of the URL.</li>
+<li>Clock differences can make a fresh SAS fail. Setting the start time a few minutes in the past, or leaving it empty, avoids that.</li>
+<li>A <strong>SAS expiration policy</strong> on the account sets a recommended maximum lifetime and logs, or blocks, tokens that exceed it.</li>
+</ul>
+
+<h3>3. Stored access policies, the limits</h3>
+<ul>
+<li>Up to <strong>five</strong> per container, file share, queue or table.</li>
+<li>They work only with <strong>service SAS</strong>. Account SAS and user delegation SAS cannot use them.</li>
+<li>Changes and deletions can take about 30 seconds to take effect.</li>
+<li>To revoke: delete the policy, rename it, or change its expiry to the past.</li>
+</ul>
+
+<h3>4. Microsoft Entra data roles</h3>
+<div class="tabla"><table>
+<thead><tr><th>Role</th><th>Allows</th></tr></thead>
+<tbody>
+<tr><td>Storage Blob Data Reader</td><td>Read and list blobs</td></tr>
+<tr><td>Storage Blob Data Contributor</td><td>Read, write and delete blobs and containers</td></tr>
+<tr><td>Storage Blob Data Owner</td><td>Everything, plus setting POSIX access control on Data Lake Storage</td></tr>
+<tr><td>Storage Queue Data Reader, Contributor, Message Sender, Message Processor</td><td>Queues</td></tr>
+<tr><td>Storage File Data SMB Share Reader, Contributor, Elevated Contributor</td><td>Azure Files over SMB with identity-based access. Elevated can also change NTFS permissions</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Owner</strong> or <strong>Contributor</strong> on the account does not include these data actions. The portal can still show data to them because it falls back to the account key, unless key access is disabled or the account is set to <strong>Default to Microsoft Entra authorization in the Azure portal</strong>.</li>
+<li>In the portal, each container shows the <strong>Authentication method</strong>: Access key or Microsoft Entra user account. A user with a data role but no key access must switch to the second.</li>
+<li>Data roles can be assigned as narrowly as one container.</li>
+</ul>
+
+<h3>5. The storage firewall in detail</h3>
+<ul>
+<li>When you choose <strong>Enabled from selected virtual networks and IP addresses</strong>, the default action becomes Deny and only the listed sources get through.</li>
+<li><strong>Virtual network rules</strong> allow subnets that have the <code>Microsoft.Storage</code> service endpoint. The subnet can be in another subscription.</li>
+<li><strong>IP rules</strong> allow public IP addresses or ranges, such as your office's. Private ranges like 10.0.0.0/8 cannot be used: traffic from your virtual networks is identified by subnet, not IP.</li>
+<li><strong>Resource instance rules</strong> allow a specific Azure resource, such as one Synapse workspace, through its managed identity.</li>
+<li>The exception <strong>Allow Azure services on the trusted services list</strong> lets services such as Azure Backup, Event Grid and Azure Monitor reach the account.</li>
+<li><strong>Private endpoints</strong> are not affected by these rules. Traffic through them is allowed even with public access disabled.</li>
+<li>Rules can take a few minutes to apply. The firewall does not affect requests already authorised by a running connection.</li>
+<li>Someone using the portal from a network not on the list sees the account but gets an access error when listing data, because the portal reads data from the user's browser.</li>
+</ul>
+
+<h3>6. Identity-based access to Azure Files, end to end</h3>
+<ol>
+<li><strong>Enable an identity source</strong> on the storage account: on-premises AD DS, Microsoft Entra Domain Services, or Microsoft Entra Kerberos for hybrid identities. One source per account.</li>
+<li><strong>Grant share-level permissions</strong> with RBAC: assign the SMB data roles to groups on the share, or set a <strong>default share-level permission</strong> for all authenticated identities.</li>
+<li><strong>Set directory and file permissions</strong>, the NTFS ACLs, with File Explorer or <code>icacls</code>. To do this the first time, mount the share with the storage account key, which acts as a super user.</li>
+<li><strong>Mount the share</strong> from a domain-joined or Entra-joined device. The user's Kerberos ticket is used, so no key is needed.</li>
+</ol>
+<ul>
+<li>Both levels apply: share-level RBAC first, then NTFS. The more restrictive result wins.</li>
+<li>SMB uses <strong>TCP 445</strong>. Many internet providers and corporate networks block it outbound. The fix is a VPN or ExpressRoute with a private endpoint, or Azure File Sync to a local server.</li>
+<li>NFS shares do not use identities. They are protected by network rules only.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -1402,7 +1872,7 @@ LESSONS.push({
   id: "az-7", n: 7, fase: 2, codigo: "Blob and Files",
   titulo: "Blob Storage and Azure Files",
   sub: "Containers, access tiers and lifecycle rules, and the protections against deleting or overwriting the wrong thing.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Blob Storage: containers, block, append and page blobs. Access tiers hot, cool (30 days minimum), cold (90 days), archive (180 days, offline, rehydration up to 15 hours with standard or high priority); account default tier hot, cool or cold; early deletion charge. Lifecycle management rules: filters and actions on base blobs, versions and snapshots, based on days since modification, creation or last access; run once a day. Data protection: blob versioning, blob snapshots, soft delete for blobs and for containers, point-in-time restore, immutability. Azure Files: SMB and NFS, tiers premium, transaction optimised, hot and cool, quotas, mounting, share snapshots (up to 200, read-only, incremental), soft delete for file shares, Azure File Sync in outline.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -1508,7 +1978,77 @@ sudo mount -t cifs //ACCOUNT.file.core.windows.net/share1 /mnt/share1 -o usernam
 </ul>
 
 <h3>7. Azure File Sync, in two lines</h3>
-<p>Azure File Sync keeps an on-premises Windows file server synchronised with an Azure file share, and with cloud tiering it leaves only the most used files on the local disk. The pieces are a Storage Sync Service, a sync group, one cloud endpoint and one or more server endpoints. It is not in the current skills outline, but it appears as a wrong answer often enough to be worth recognising.</p>
+<p>Azure File Sync keeps an on-premises Windows file server synchronised with an Azure file share, and with cloud tiering it leaves only the most used files on the local disk. The pieces are a Storage Sync Service, a sync group, one cloud endpoint and one or more server endpoints. It is not in the current skills outline, but it appears as a wrong answer often enough to be worth recognising.</p>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the limits of each blob type, how tiers and rehydration behave in practice, more about protecting data, and the details of file shares and Azure File Sync.</p>
+
+<h3>1. Blob types and their limits</h3>
+<div class="tabla"><table>
+<thead><tr><th>Type</th><th>Built from</th><th>Maximum size, approximately</th><th>Typical content</th></tr></thead>
+<tbody>
+<tr><td>Block blob</td><td>Blocks uploaded separately and committed</td><td>About 190 TiB</td><td>Documents, images, video, backups</td></tr>
+<tr><td>Append blob</td><td>Blocks added only at the end</td><td>About 195 GiB</td><td>Logs</td></tr>
+<tr><td>Page blob</td><td>512-byte pages, random access</td><td>8 TiB</td><td>Disk images, unmanaged VM disks</td></tr>
+</tbody></table></div>
+<ul>
+<li>The type is chosen when the blob is created and cannot be changed.</li>
+<li>Access tiers, lifecycle tiering and object replication apply to <strong>block blobs</strong>.</li>
+<li>Container names: 3 to 63 characters, lowercase letters, digits and hyphens, starting with a letter or digit, no double hyphens.</li>
+</ul>
+
+<h3>2. Tiers in practice</h3>
+<ul>
+<li>A blob either has an <strong>explicit</strong> tier, set on the blob, or an <strong>inferred</strong> one from the account default. Changing the account default changes the tier, and the price, of every blob with an inferred tier.</li>
+<li>Moving to a cooler tier is billed as a write in the new tier. Moving to a warmer tier is billed as a read from the old one. Leaving cool, cold or archive early adds the early deletion charge.</li>
+<li><strong>Rehydration priority.</strong> Standard can take up to 15 hours. High priority can finish in under an hour for blobs smaller than about 10 GB, at a higher price.</li>
+<li>Two ways to rehydrate: <strong>change the tier</strong> of the archived blob, or <strong>copy</strong> it to a new blob in an online tier. The copy leaves the original in archive.</li>
+<li>Lifecycle rules can use <strong>last access time</strong> once access tracking is enabled, for example "move to cool 30 days after last access", and can move a blob back to hot when it is accessed again.</li>
+<li>Rules can filter by <strong>blob index tags</strong>, key and value pairs you set on blobs, as well as by prefix.</li>
+</ul>
+
+<h3>3. How the protection features interact</h3>
+<ul>
+<li>With <strong>versioning</strong> on, deleting a blob turns its current version into a previous version. The data is still there and you restore it by promoting a version.</li>
+<li><strong>Soft delete</strong> then protects those previous versions from being deleted for the retention period.</li>
+<li>Without versioning, soft delete keeps a deleted blob, and the snapshots of overwritten blobs, as soft-deleted objects you can undelete.</li>
+<li>The <strong>change feed</strong> is an ordered log of every change to blobs in the account. Point-in-time restore and object replication rely on it.</li>
+<li><strong>Immutability</strong> has two kinds of policy. A <strong>time-based retention</strong> policy keeps blobs unmodifiable for a number of days. It starts unlocked, so it can be changed while testing; once <strong>locked</strong> it can only be extended, never shortened or removed. A <strong>legal hold</strong> keeps blobs unmodifiable until the hold is cleared, with no fixed date.</li>
+<li>Immutability can be set on a container or, with version-level immutability, on individual versions.</li>
+</ul>
+<p>A worked choice. Requirement: "If a user overwrites an invoice, restore the previous content; if someone deletes a whole container, recover it within 14 days; audit files must never be altered for five years." Answer: versioning for overwrites, container soft delete with 14 days for the container, and a locked time-based retention policy of five years on the audit container.</p>
+
+<h3>4. File shares in more detail</h3>
+<ul>
+<li>Azure Files speaks <strong>SMB 3.x</strong> with encryption in transit, and <strong>NFS 4.1</strong> on premium shares.</li>
+<li>Standard shares can reach up to 100 TiB with large file shares enabled. Premium shares are on SSD and billed by <strong>provisioned</strong> size, which also sets their performance.</li>
+<li>A share's <strong>quota</strong> limits how much data it can hold. It does not reserve space on standard shares.</li>
+<li>Share snapshots are taken for the <strong>whole share</strong>, not single files, but you can restore single files from them. Azure Backup can schedule and retain them for you.</li>
+<li>Deleting a storage account deletes its shares and their snapshots, whatever soft delete says. Protect the account itself with a CanNotDelete lock.</li>
+</ul>
+
+<h3>5. Azure File Sync in more detail</h3>
+<div class="tabla"><table>
+<thead><tr><th>Component</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td>Storage Sync Service</td><td>The top-level Azure resource. A server can be registered with only one</td></tr>
+<tr><td>Sync group</td><td>Defines what synchronises with what</td></tr>
+<tr><td>Cloud endpoint</td><td>The Azure file share. Exactly one per sync group</td></tr>
+<tr><td>Server endpoint</td><td>A path on a registered Windows Server. Several per sync group, on different servers</td></tr>
+<tr><td>Azure File Sync agent</td><td>Installed on each Windows Server to register it</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Cloud tiering</strong> keeps frequently used files on the server and replaces the rest with pointers that download on demand. A <strong>volume free space policy</strong> keeps a percentage of the disk free; a <strong>date policy</strong> tiers files not accessed for a number of days.</li>
+<li>Several branch offices can sync the same share, giving each a fast local cache.</li>
+<li>It is the usual answer when users need fast local access to files that must also be in Azure, or when port 445 to Azure is blocked.</li>
+</ul>
+
+<h3>6. Useful commands</h3>
+<div class="tabla"><pre>az storage container create --account-name ACCOUNT --name invoices --auth-mode login
+az storage blob upload --account-name ACCOUNT --container-name invoices --name 2026/q1.pdf --file q1.pdf --tier Cool --auth-mode login
+az storage blob set-tier --account-name ACCOUNT --container-name invoices --name 2026/q1.pdf --tier Hot --rehydrate-priority High --auth-mode login
+az storage account blob-service-properties update --account-name ACCOUNT --resource-group rg1 --enable-delete-retention true --delete-retention-days 14 --enable-container-delete-retention true --container-delete-retention-days 14
+az storage share snapshot --account-name ACCOUNT --name share1</pre></div>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -1672,7 +2212,7 @@ LESSONS.push({
   id: "az-8", n: 8, fase: 3, codigo: "ARM and Bicep",
   titulo: "ARM templates and Bicep",
   sub: "Describe the infrastructure in a file and let Azure build it. Read a template, change it, deploy it and export one from what already exists.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Infrastructure as code in Azure. ARM template JSON structure: $schema, contentVersion, parameters, variables, functions, resources, outputs. Bicep: param, var, resource, module, output, existing, decorators, implicit dependencies. Deployment scopes (resource group, subscription, management group, tenant), deployment modes (incremental default, complete), what-if, parameter files, dependsOn, copy loops, conditions. Commands: az deployment group create, New-AzResourceGroupDeployment, az bicep build and decompile. Export template from a resource, a resource group or the deployment history. Official Lab 03.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -1820,6 +2360,105 @@ az bicep build --file main.bicep             # Bicep to JSON</pre></div>
 <ul>
 <li>Decompiling is a best effort. Expect warnings and some tidying.</li>
 <li>A <strong>template spec</strong> stores a template as a resource in Azure, so it can be shared and controlled with RBAC.</li>
+</ul>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part gives you the extra template skills the exam expects: the most used functions, parameter files, loops and conditions in both languages, reading what-if output, and the limits and errors you are likely to meet.</p>
+
+<h3>1. Template functions you will see</h3>
+<div class="tabla"><table>
+<thead><tr><th>Function</th><th>Returns</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>resourceGroup()</code></td><td>The target group, with .location, .name, .id</td><td><code>[resourceGroup().location]</code></td></tr>
+<tr><td><code>subscription()</code></td><td>The subscription, with .subscriptionId</td><td><code>[subscription().subscriptionId]</code></td></tr>
+<tr><td><code>uniqueString(...)</code></td><td>A 13-character hash, stable for the same input</td><td><code>[concat('st', uniqueString(resourceGroup().id))]</code> gives a unique storage name</td></tr>
+<tr><td><code>concat()</code>, <code>format()</code></td><td>Joined text</td><td><code>[format('{0}-nic', parameters('vmName'))]</code></td></tr>
+<tr><td><code>resourceId(type, name)</code></td><td>The full ID of a resource</td><td><code>[resourceId('Microsoft.Network/virtualNetworks', 'vnet1')]</code></td></tr>
+<tr><td><code>reference(name)</code></td><td>The runtime properties of a deployed resource</td><td><code>[reference('pip1').ipAddress]</code></td></tr>
+<tr><td><code>listKeys(id, apiVersion)</code></td><td>Keys of a resource, such as a storage account</td><td>Used in outputs or connection strings</td></tr>
+<tr><td><code>copyIndex()</code></td><td>The current number in a copy loop</td><td><code>[concat('vm', copyIndex(1))]</code> gives vm1, vm2...</td></tr>
+</tbody></table></div>
+
+<h3>2. Parameter files</h3>
+<div class="tabla"><pre>{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName":  { "value": "vm-web-01" },
+    "vmSize":  { "value": "Standard_B2s" },
+    "adminPassword": {
+      "reference": {
+        "keyVault": { "id": "/subscriptions/1111/resourceGroups/rg-sec/providers/Microsoft.KeyVault/vaults/kv-contoso" },
+        "secretName": "vmAdminPassword"
+      }
+    }
+  }
+}</pre></div>
+<ul>
+<li>A parameter file has its own schema, ending in <em>deploymentParameters.json</em>, and gives each parameter a <code>value</code>.</li>
+<li>A <strong>Key Vault reference</strong> fetches a secret at deployment time, so the password never appears in the file. The vault needs <strong>Azure Resource Manager for template deployment</strong> enabled in its access configuration, and the deploying user needs permission to use it.</li>
+<li>Values on the command line override values in the file.</li>
+<li>For Bicep, the equivalent is a <code>.bicepparam</code> file starting with <code>using 'main.bicep'</code> followed by <code>param vmName = 'vm-web-01'</code> lines.</li>
+</ul>
+
+<h3>3. Loops, conditions and modules</h3>
+<div class="tabla"><pre>// JSON: three storage accounts, only if deployStorage is true
+{
+  "type": "Microsoft.Storage/storageAccounts",
+  "apiVersion": "2023-05-01",
+  "name": "[concat('stdata', copyIndex(), uniqueString(resourceGroup().id))]",
+  "condition": "[parameters('deployStorage')]",
+  "copy": { "name": "storageLoop", "count": 3 },
+  "location": "[resourceGroup().location]",
+  "sku": { "name": "Standard_LRS" },
+  "kind": "StorageV2"
+}
+
+// Bicep: the same idea
+param deployStorage bool = true
+resource st 'Microsoft.Storage/storageAccounts@2023-05-01' = [for i in range(0, 3): if (deployStorage) {
+  name: 'stdata&#36;{i}&#36;{uniqueString(resourceGroup().id)}'
+  location: resourceGroup().location
+  sku: { name: 'Standard_LRS' }
+  kind: 'StorageV2'
+}]
+
+// Bicep module: reuse another file
+module network 'network.bicep' = {
+  name: 'networkDeployment'
+  params: { vnetName: 'vnet-hub', addressPrefix: '10.0.0.0/16' }
+}</pre></div>
+<p>Bicep builds strings with <em>dollar and braces</em> inside single quotes, while JSON uses <code>concat()</code> or <code>format()</code>. Bicep comments start with two slashes. JSON templates officially allow comments too, but many tools do not.</p>
+
+<h3>4. Reading what-if output</h3>
+<div class="tabla"><table>
+<thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>+</code> Create</td><td>The resource does not exist and will be created</td></tr>
+<tr><td><code>~</code> Modify</td><td>It exists and some properties will change, listed below it</td></tr>
+<tr><td><code>-</code> Delete</td><td>It will be deleted. Only in complete mode</td></tr>
+<tr><td><code>=</code> NoChange</td><td>It exists and matches</td></tr>
+<tr><td><code>*</code> Ignore</td><td>It exists in the group but not in the template, and incremental mode leaves it alone</td></tr>
+<tr><td><code>!</code> Deploy</td><td>It will be redeployed, but what-if cannot tell whether properties change</td></tr>
+</tbody></table></div>
+
+<h3>5. Modifying a template: the usual exam tasks</h3>
+<ul>
+<li><strong>Change a value for every deployment</strong>: edit the <code>defaultValue</code> of the parameter, or the value in the parameter file.</li>
+<li><strong>Restrict choices</strong>: add or edit <code>allowedValues</code>, <code>minLength</code>, <code>maxLength</code>, <code>minValue</code>, <code>maxValue</code>. In Bicep: <code>@allowed</code>, <code>@minLength</code> and so on.</li>
+<li><strong>Use the group's region</strong>: set location to <code>[resourceGroup().location]</code>, or <code>resourceGroup().location</code> in Bicep.</li>
+<li><strong>Return a value</strong>: add an output, such as a public IP address.</li>
+<li><strong>Add a resource that depends on another</strong>: add it to <code>resources</code> with <code>dependsOn</code> in JSON, or refer to the other resource's symbolic name in Bicep.</li>
+</ul>
+
+<h3>6. Limits, history and errors</h3>
+<ul>
+<li>A resource group keeps up to <strong>800</strong> deployments in its history. When the limit is near, Azure deletes the oldest automatically.</li>
+<li>A deployment has a <strong>name</strong>. Reusing a name replaces that entry in the history. Portal deployments get generated names.</li>
+<li>A template can deploy to more than one resource group or subscription using <strong>nested</strong> deployments with their own scope, or Bicep modules with a <code>scope</code> property.</li>
+<li>Common errors: <em>InvalidTemplate</em> (syntax or a wrong function), <em>InvalidTemplateDeployment</em> with a policy name inside (blocked by policy), <em>QuotaExceeded</em> (vCPU quota), <em>SkuNotAvailable</em> (size not offered in that region or zone), <em>StorageAccountAlreadyTaken</em> (the global name is in use). The resource group's <strong>Deployments</strong> page shows the failing operation and its message.</li>
+<li><strong>Template specs</strong> store a template as a versioned Azure resource, shared with RBAC, so teams deploy approved templates without copying files.</li>
+<li><strong>Deployment stacks</strong> manage a group of resources as one unit and can deny changes or deletions to them. You may see them in newer material.</li>
 </ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
@@ -2002,7 +2641,7 @@ LESSONS.push({
   id: "az-9", n: 9, fase: 3, codigo: "Virtual machines",
   titulo: "Virtual machines",
   sub: "Create a VM and know every piece it is made of: the size, the disks, how they are encrypted, and what moving it really changes.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Azure virtual machines. Components (VM, NIC, OS disk, VNet/subnet, NSG, public IP). Size families and the naming convention; resizing and when deallocation is needed. Power states: stopped versus stopped (deallocated) and billing. Disks: OS, temporary, data; managed disk types Standard HDD, Standard SSD, Premium SSD, Premium SSD v2, Ultra; snapshots and images; host caching. Encryption: server-side encryption with platform or customer-managed keys, encryption at host, Azure Disk Encryption (BitLocker and DM-Crypt with Key Vault, retiring 15 September 2028), confidential disk encryption. Moving VMs across resource groups, subscriptions and regions (Azure Resource Mover). Extensions, Run Command, redeploy, boot diagnostics. Official Lab 08.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -2115,7 +2754,77 @@ az vm list-sizes --location westeurope --output table
 az vm resize --resource-group rg1 --name vm1 --size Standard_B2s
 az vm disk attach --resource-group rg1 --vm-name vm1 --name data1 --new --size-gb 32 --sku StandardSSD_LRS
 az vm deallocate --resource-group rg1 --name vm1
-az vm run-command invoke --resource-group rg1 --name vm1 --command-id RunShellScript --scripts "df -h"</pre></div>
+az vm run-command invoke --resource-group rg1 --name vm1 --command-id RunShellScript --scripts "df -h"</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the options on the creation pages that the summary skipped, how disk performance and caching work, the exact steps for encryption and for moving to another region, and what the VM agent does.</p>
+
+<h3>1. More choices at creation</h3>
+<div class="tabla"><table>
+<thead><tr><th>Option</th><th>What to know</th></tr></thead>
+<tbody>
+<tr><td><strong>Image</strong></td><td>Marketplace images, your own images from an Azure Compute Gallery, or a specialised disk</td></tr>
+<tr><td><strong>Security type</strong></td><td><em>Trusted launch</em> is the default for most images: secure boot, a virtual TPM and boot integrity monitoring. <em>Confidential</em> VMs also encrypt memory. <em>Standard</em> has neither</td></tr>
+<tr><td><strong>Azure Spot</strong></td><td>Unused capacity at a large discount. Azure can evict the VM at short notice, so only for interruptible work</td></tr>
+<tr><td><strong>Licensing</strong></td><td>Azure Hybrid Benefit for Windows Server or RHEL and SLES subscriptions you already own</td></tr>
+<tr><td><strong>Delete with VM</strong></td><td>Checkboxes to delete the OS disk, data disks, NIC and public IP together with the VM. Without them those resources stay and keep costing money</td></tr>
+<tr><td><strong>Auto-shutdown</strong></td><td>Deallocates the VM every day at a set time, with an optional email. Ideal for labs</td></tr>
+</tbody></table></div>
+
+<h3>2. Disk performance and caching</h3>
+<ul>
+<li>For Premium SSD and Standard SSD, IOPS and throughput grow with the <strong>disk size tier</strong>. A bigger disk is faster. Premium SSD v2 and Ultra let you set IOPS and throughput separately from size.</li>
+<li>The <strong>VM size</strong> has its own limits for total disk IOPS and throughput. A fast disk on a small VM is limited by the VM. When a question says "the disk is fast but performance is low", check the VM size limit.</li>
+<li>Smaller Premium SSDs can <strong>burst</strong> above their baseline for short periods.</li>
+<li><strong>Host caching</strong> per disk: <em>ReadOnly</em> for data that is read a lot, such as database data files; <em>None</em> for write-heavy disks, such as database log files; <em>ReadWrite</em> is the default for the OS disk, and only safe when the application handles cached writes.</li>
+<li>To make a data disk bigger: increase its size in Azure, which for many disk types requires the VM to be deallocated or the disk to be detached, then <strong>extend the partition inside the operating system</strong>. Azure does not do the second step for you.</li>
+<li><strong>Snapshots</strong> of managed disks can be <strong>incremental</strong>, storing only changes since the last snapshot. They are the quick way to copy a disk before a risky change.</li>
+<li>You can <strong>swap the OS disk</strong> of a VM for another managed disk, for example one created from a snapshot, without recreating the VM.</li>
+<li>A <strong>shared disk</strong> can be attached to several VMs at once for clustered applications.</li>
+</ul>
+
+<h3>3. Encryption, the steps</h3>
+<p><strong>Encryption at host</strong>, the recommended option:</p>
+<div class="tabla"><pre>az feature register --namespace Microsoft.Compute --name EncryptionAtHost   # once per subscription
+az vm deallocate --resource-group rg1 --name vm1
+az vm update --resource-group rg1 --name vm1 --set securityProfile.encryptionAtHost=true
+az vm start --resource-group rg1 --name vm1</pre></div>
+<p><strong>Azure Disk Encryption</strong>, still in the outline:</p>
+<div class="tabla"><pre>az keyvault create --resource-group rg1 --name kv-ade-01 --location westeurope --enabled-for-disk-encryption true
+az vm encryption enable --resource-group rg1 --name vm1 --disk-encryption-keyvault kv-ade-01 --volume-type All
+az vm encryption show --resource-group rg1 --name vm1</pre></div>
+<ul>
+<li><code>--volume-type</code> can be OS, Data or All.</li>
+<li>Optionally a <strong>key encryption key</strong> in the vault wraps the disk encryption secrets, for extra control.</li>
+<li>ADE needs enough memory on small Linux VMs and is not supported on some sizes and images. Check the documentation before choosing it.</li>
+<li><strong>Customer-managed keys</strong> for server-side encryption: create a <strong>disk encryption set</strong> pointing to a Key Vault key, then select it on each disk. The vault needs purge protection.</li>
+</ul>
+
+<h3>4. Moving to another region with Resource Mover</h3>
+<ol>
+<li><strong>Select resources</strong> in the source region. Resource Mover lists their dependencies, such as the virtual network, NSG and public IP, and asks you to add them.</li>
+<li><strong>Prepare</strong>: it creates what is needed in the target, starting replication of the VM's disks.</li>
+<li><strong>Initiate move</strong>: it creates the VM in the target region. The source still exists.</li>
+<li><strong>Commit</strong> when you are satisfied, or <strong>discard</strong> to undo.</li>
+<li><strong>Delete source</strong> resources when you no longer need them.</li>
+</ol>
+<p>The new VM has a new resource ID and new IP addresses unless you plan them. Moves between resource groups and subscriptions, in contrast, keep the VM where it runs.</p>
+
+<h3>5. The VM agent and extensions</h3>
+<ul>
+<li>The <strong>Azure VM agent</strong> runs inside every marketplace VM. It reports health and runs extensions. Without it, Run Command, password reset and most extensions do not work.</li>
+<li>Common extensions: <strong>Custom Script</strong>, <strong>Azure Monitor Agent</strong>, <strong>Microsoft Antimalware</strong>, <strong>VMAccess</strong> for credential resets, <strong>Key Vault</strong> to install certificates, <strong>Azure Disk Encryption</strong>, <strong>Network Watcher Agent</strong>.</li>
+<li>Extensions can be added at creation, later from the portal, or in templates. A failed extension shows its error under <strong>Extensions + applications</strong>.</li>
+</ul>
+
+<h3>6. A worked scenario</h3>
+<p>"A Windows VM in West Europe hosts a small SQL database. Users say it is slow at month end. You must improve disk performance, keep the cost low the rest of the month, encrypt the temporary disk, and keep the VM where it is."</p>
+<ol>
+<li>Check the VM size limits against the disk metrics. If the VM caps throughput, <strong>resize</strong> the VM for month end and back afterwards, or choose a size with higher disk limits.</li>
+<li>Put the database log on a data disk with caching <strong>None</strong> and the data files on a disk with caching <strong>ReadOnly</strong>.</li>
+<li>Enable <strong>encryption at host</strong> during the same maintenance window, since both need the VM deallocated.</li>
+<li>Take an <strong>incremental snapshot</strong> of the disks before the change, as a fallback.</li>
+</ol>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -2289,7 +2998,7 @@ LESSONS.push({
   id: "az-10", n: 10, fase: 3, codigo: "Availability and scale",
   titulo: "Availability sets, zones and scale sets",
   sub: "One VM is a single point of failure. Spread copies across racks or datacentres, and let Azure add and remove copies as load changes.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "High availability and scaling for Azure VMs. Availability sets: fault domains (up to 3) and update domains (default 5, up to 20), 99.95% SLA, VM must join at creation. Availability zones: at least three separate locations in a region, 99.99% SLA with two or more VMs in two or more zones, zonal versus zone-redundant resources, Standard public IP and Standard Load Balancer. Single VM SLA with premium disks 99.9%. Virtual Machine Scale Sets: Flexible and Uniform orchestration, autoscale (min, max, default, scale-out and scale-in rules, cooldown, schedules), scale-in policy, upgrade policy (manual, automatic, rolling), overprovisioning. Proximity placement groups. Official Lab 08.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -2377,7 +3086,75 @@ LESSONS.push({
 az vm create --resource-group rg1 --name vm1 --image Ubuntu2204 --availability-set avset1 --generate-ssh-keys
 az vm create --resource-group rg1 --name vm2 --image Ubuntu2204 --zone 2 --generate-ssh-keys
 az vmss create --resource-group rg1 --name vmss1 --image Ubuntu2204 --instance-count 2 --zones 1 2 3 --generate-ssh-keys
-az vmss scale --resource-group rg1 --name vmss1 --new-capacity 4</pre></div>
+az vmss scale --resource-group rg1 --name vmss1 --new-capacity 4</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the finer behaviour of availability sets and zones, the differences between the two scale set modes, and how to design autoscale profiles that work over a real week.</p>
+
+<h3>1. Availability sets, a little deeper</h3>
+<ul>
+<li>For VMs with managed disks the availability set must be <strong>Aligned</strong>, the managed SKU, so that the disks of each VM are also placed in separate storage fault domains.</li>
+<li>The number of fault domains available, two or three, depends on the region.</li>
+<li>All VMs in a set should run the same role. Put web servers in one set and database servers in another, so that a rack failure does not take out a whole tier.</li>
+<li>Planned maintenance usually does not reboot VMs. When it must, Azure respects update domains. Applications can receive warnings through <strong>Scheduled Events</strong>, and administrators can control timing with <strong>maintenance configurations</strong>.</li>
+</ul>
+
+<h3>2. Zones, a little deeper</h3>
+<ul>
+<li>A <strong>zonal</strong> VM is pinned to the zone you choose. Its LRS disks are in that zone.</li>
+<li><strong>ZRS managed disks</strong> are replicated across zones, so they can be attached to a VM in another zone if the first zone fails.</li>
+<li>To give users one address for VMs in several zones, use a <strong>zone-redundant</strong> Standard load balancer or application gateway.</li>
+<li>Data transfer between zones in the same region is billed. Chatty applications cost more when spread over zones.</li>
+</ul>
+
+<h3>3. Flexible and Uniform scale sets</h3>
+<div class="tabla"><table>
+<thead><tr><th></th><th>Flexible</th><th>Uniform</th></tr></thead>
+<tbody>
+<tr><td>Instances are</td><td>Standard VMs, visible as VM resources</td><td>Instances managed only through the scale set</td></tr>
+<tr><td>Mix sizes or Spot and regular VMs</td><td>Yes</td><td>No</td></tr>
+<tr><td>Add an existing VM</td><td>Possible in some cases</td><td>No</td></tr>
+<tr><td>Spreading</td><td>Across zones and fault domains</td><td>Across zones and fault domains, with placement groups</td></tr>
+<tr><td>Recommendation</td><td>Default for new deployments</td><td>Large identical stateless fleets built the older way</td></tr>
+</tbody></table></div>
+
+<h3>4. Keeping instances healthy and current</h3>
+<ul>
+<li>The <strong>Application Health extension</strong>, or a load balancer probe, tells the scale set whether each instance's application works.</li>
+<li><strong>Automatic instance repairs</strong> replace instances reported unhealthy for a grace period.</li>
+<li><strong>Automatic OS image upgrades</strong> roll new platform image versions through the set in batches, using health to stop if something goes wrong.</li>
+<li><strong>Spot priority mix</strong> lets a set run a base of regular VMs plus a percentage of Spot VMs for cheaper extra capacity.</li>
+</ul>
+
+<h3>5. Autoscale profiles over a week</h3>
+<p>An autoscale setting can contain several <strong>profiles</strong>. Only one is active at a time.</p>
+<div class="tabla"><table>
+<thead><tr><th>Profile type</th><th>Active when</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Default</strong></td><td>No other profile applies</td><td>Minimum 2, maximum 6, CPU rules</td></tr>
+<tr><td><strong>Recurrence</strong></td><td>On given days and times every week</td><td>Monday to Friday 08:00 to 19:00: minimum 4, maximum 12</td></tr>
+<tr><td><strong>Fixed date</strong></td><td>Between two dates</td><td>Black Friday: minimum 10, maximum 30</td></tr>
+</tbody></table></div>
+<ul>
+<li>When a recurrence or fixed-date profile ends, autoscale returns to the default profile, applying its limits at that moment.</li>
+<li>Rules inside a profile can use <strong>host metrics</strong>, such as Percentage CPU, available without an agent, or <strong>guest metrics</strong> and Application Insights metrics, which need an agent or instrumentation.</li>
+<li>Each rule has a metric, a statistic over a time grain (average, maximum), a time window, an operator and threshold, an action (increase or decrease by a count or a percent, or set to a count) and a cool down.</li>
+<li><strong>Predictive autoscale</strong> for scale sets can learn daily and weekly patterns from CPU history and scale out before the load arrives.</li>
+<li>Autoscale can send <strong>notifications</strong> by email or webhook whenever it scales.</li>
+</ul>
+<p>A worked check. Default profile: minimum 2, maximum 6. Weekday profile from 08:00: minimum 4. At 07:59 the set has 2 instances and low CPU. At 08:00 the weekday profile becomes active and the set grows to 4 at once, because the new minimum is 4, whatever the CPU. At 19:00 it returns to the default profile and scale-in rules bring it down gradually, not instantly.</p>
+
+<h3>6. Choosing quickly</h3>
+<div class="tabla"><table>
+<thead><tr><th>Requirement in the question</th><th>Answer</th></tr></thead>
+<tbody>
+<tr><td>Survive a rack failure, cheapest</td><td>Availability set</td></tr>
+<tr><td>Survive a datacentre failure</td><td>Availability zones</td></tr>
+<tr><td>Survive a region failure</td><td>A second region, with Site Recovery or an active deployment</td></tr>
+<tr><td>Change the number of VMs with load</td><td>Scale set with autoscale</td></tr>
+<tr><td>More power for one VM</td><td>Resize, vertical scaling</td></tr>
+<tr><td>Lowest latency between VMs</td><td>Proximity placement group</td></tr>
+</tbody></table></div>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -2535,7 +3312,7 @@ LESSONS.push({
   id: "az-11", n: 11, fase: 3, codigo: "Containers",
   titulo: "Containers: registry, instances and apps",
   sub: "Store images in Azure Container Registry, run one quickly with Container Instances, and run many with scaling in Container Apps.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Containers in Azure for AZ-104. Azure Container Registry: SKUs Basic, Standard, Premium (geo-replication, private endpoints), login server, authentication (Microsoft Entra, admin user, AcrPull and AcrPush roles, managed identity), ACR Tasks and az acr build. Azure Container Instances: container groups, restart policies Always, OnFailure, Never, CPU and memory sizing, public IP with DNS label or virtual network deployment, Azure Files volumes, per-second billing, no autoscale. Azure Container Apps: environment, revisions, ingress, scale rules (HTTP, TCP, CPU, memory, custom KEDA), scale to zero, replicas. Choosing between ACI, Container Apps, AKS and App Service. Official Labs 09b and 09c.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -2626,6 +3403,84 @@ az containerapp revision list --resource-group rg1 --name app1 --output table</p
 <tr><td>Microservices with autoscaling, scale to zero, revisions and traffic splitting, without managing Kubernetes</td><td>Azure Container Apps</td></tr>
 <tr><td>Full control of Kubernetes itself</td><td>Azure Kubernetes Service, outside the current outline</td></tr>
 <tr><td>A web application in a container, with slots and custom domains</td><td>App Service, in the next lesson</td></tr>
+</tbody></table></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the registry features beyond push and pull, the practical settings of a container group, and how Container Apps sizes, scales and runs jobs.</p>
+
+<h3>1. Azure Container Registry, more features</h3>
+<ul>
+<li><strong>ACR Tasks</strong> can run automatically: on a commit to a Git repository, when a <strong>base image</strong> is updated (for example a new patched OS image), or on a <strong>schedule</strong>.</li>
+<li><strong>Import</strong> copies images from Docker Hub, another registry or Microsoft Container Registry into yours without Docker: <code>az acr import</code>.</li>
+<li><strong>Tokens and scope maps</strong> give a pipeline or device access to selected repositories only, for example pull on <code>team1/*</code>.</li>
+<li>A <strong>retention policy</strong> for untagged manifests deletes old image layers automatically, a Premium feature.</li>
+<li>Deleting a tag does not free space if the image is still referenced. Use <code>az acr repository delete</code> or a purge task.</li>
+<li>The <strong>admin user</strong> exists for tests and for a few services that need a username and password. For production use managed identities with AcrPull.</li>
+</ul>
+<div class="tabla"><pre>az acr task create --registry contosoreg --name buildweb --image web:{{.Run.ID}} --context https://github.com/contoso/web.git --file Dockerfile --git-access-token TOKEN
+az acr import --name contosoreg --source docker.io/library/nginx:latest --image base/nginx:latest
+az acr show-usage --name contosoreg --output table</pre></div>
+
+<h3>2. Container Instances, practical settings</h3>
+<ul>
+<li><strong>Environment variables</strong> pass configuration. <strong>Secure environment variables</strong> are hidden in the portal and API output, for passwords.</li>
+<li><strong>Liveness</strong> and <strong>readiness</strong> probes check that a container is alive and ready for traffic.</li>
+<li><strong>Init containers</strong> run to completion before the main containers start, for setup tasks.</li>
+<li>Groups with several containers are usually deployed from a <strong>YAML file</strong> or a template, with <code>az container create --file group.yaml</code>.</li>
+<li>To pull from a private registry you give the group the registry's login server and credentials, or a <strong>managed identity</strong> with AcrPull.</li>
+<li>CPU and memory limits per group depend on the region and operating system. Containers in a group can share an Azure file share, an emptyDir volume, a secret volume or a Git repo volume.</li>
+<li><code>az container logs</code> shows output, <code>az container attach</code> streams it, and <code>az container exec</code> opens a shell inside a running container.</li>
+</ul>
+
+<h3>3. Container Apps, sizing</h3>
+<ul>
+<li>An environment uses <strong>workload profiles</strong>. The <strong>Consumption</strong> profile is serverless: you pay per second for the vCPU and memory of running replicas, and nothing when scaled to zero. <strong>Dedicated</strong> profiles reserve machines of a chosen size for steady or heavy workloads.</li>
+<li>On Consumption, each container gets a combination of CPU and memory such as 0.25 vCPU with 0.5 GiB, 0.5 with 1 GiB, up to 4 vCPU with 8 GiB per replica, with memory twice the CPU.</li>
+<li>The total of all containers in a replica, including sidecars, must fit one of the allowed combinations.</li>
+</ul>
+
+<h3>4. Container Apps, scaling in detail</h3>
+<div class="tabla"><pre>scale:
+  minReplicas: 0
+  maxReplicas: 10
+  rules:
+  - name: http-rule
+    http:
+      metadata:
+        concurrentRequests: "50"
+  - name: queue-rule
+    custom:
+      type: azure-servicebus
+      metadata:
+        queueName: orders
+        messageCount: "20"
+      auth:
+      - secretRef: sb-connection
+        triggerParameter: connection</pre></div>
+<ul>
+<li>With <code>concurrentRequests: 50</code>, 200 simultaneous requests lead towards 4 replicas.</li>
+<li>Custom rules use <strong>KEDA</strong> scalers. By default KEDA checks the event source every 30 seconds and waits 300 seconds without events before scaling the last replica to zero.</li>
+<li>If several rules apply, the app scales to the highest number any rule asks for, within the limits.</li>
+<li><strong>Secrets</strong> are stored at the app level and referenced by containers and scale rules by name. They can also point to Key Vault.</li>
+</ul>
+
+<h3>5. Container Apps, revisions and jobs</h3>
+<ul>
+<li>In <strong>single revision</strong> mode, the new revision replaces the old one once it is ready. In <strong>multiple revision</strong> mode, you keep several active and divide traffic.</li>
+<li><strong>Labels</strong> give a revision its own fixed URL, for testing a new version before sending users to it.</li>
+<li><strong>Container Apps jobs</strong> run containers that finish: <em>manual</em> jobs started on demand, <em>scheduled</em> jobs with a cron expression, and <em>event-driven</em> jobs started by queue messages. They are the Container Apps answer to batch work, where ACI with OnFailure is the simpler one.</li>
+</ul>
+
+<h3>6. Choosing, with more nuance</h3>
+<div class="tabla"><table>
+<thead><tr><th>Scenario</th><th>Best fit</th></tr></thead>
+<tbody>
+<tr><td>Run one container quickly for a test, with a public address</td><td>ACI</td></tr>
+<tr><td>A nightly job, simple, retry on failure</td><td>ACI with OnFailure, or a scheduled Container Apps job</td></tr>
+<tr><td>A web API that idles at night and peaks by day</td><td>Container Apps with HTTP scaling and minimum 0</td></tr>
+<tr><td>Process queue messages, scaling with queue length</td><td>Container Apps with a KEDA rule, or an event-driven job</td></tr>
+<tr><td>Blue-green release of a containerised microservice</td><td>Container Apps revisions and traffic split</td></tr>
+<tr><td>A web app in a container that needs custom domains, slots and App Service features</td><td>App Service for Containers</td></tr>
 </tbody></table></div>
 
 <h3>Go deeper on Microsoft Learn</h3>
@@ -2776,7 +3631,7 @@ LESSONS.push({
   id: "az-12", n: 12, fase: 3, codigo: "App Service",
   titulo: "Azure App Service",
   sub: "Host web applications without managing servers: plans and tiers, scaling, custom domains and certificates, backups, networking and deployment slots.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Azure App Service for AZ-104. App Service plan: region, operating system, tier, instance count; apps in a plan share its instances. Tiers Free, Shared, Basic, Standard, Premium, Isolated and what each unlocks (custom domains, TLS, manual scale, autoscale, slots, backups). Scale up versus scale out, autoscale rules. Custom domains: CNAME, A record, asuid TXT verification. Certificates: free managed certificate, App Service certificate, Key Vault import, uploaded PFX; SNI and IP-based bindings; HTTPS only, minimum TLS. Backup: automatic and custom, storage account, linked database. Networking: access restrictions and private endpoints for inbound, virtual network integration and hybrid connections for outbound. Deployment slots: swap, slot settings, swap with preview, auto swap, traffic percentage. Official Lab 09a.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -2901,7 +3756,70 @@ az webapp create --resource-group rg1 --plan plan1 --name contoso-web-01 --runti
 az webapp deployment slot create --resource-group rg1 --name contoso-web-01 --slot staging
 az webapp deployment slot swap --resource-group rg1 --name contoso-web-01 --slot staging --target-slot production
 az appservice plan update --resource-group rg1 --name plan1 --sku P1V3
-az appservice plan update --resource-group rg1 --name plan1 --number-of-workers 3</pre></div>
+az appservice plan update --resource-group rg1 --name plan1 --number-of-workers 3</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the plan details that decide many questions, how settings and deployments work, more on domains and TLS, the backup mechanics, network edge cases and exactly what happens during a slot swap.</p>
+
+<h3>1. Plan details worth knowing</h3>
+<ul>
+<li><strong>Free</strong> gives 60 CPU minutes per day, <strong>Shared</strong> 240. When the quota is used, the app stops until the next day.</li>
+<li><strong>Always On</strong>, from Basic, keeps the app loaded so the first request after idle time is not slow. Without it, idle apps are unloaded after about 20 minutes.</li>
+<li><strong>Per-app scaling</strong> lets a busy app use more of the plan's instances than a quiet one in the same plan.</li>
+<li><strong>Automatic scaling</strong>, on Premium v2 and v3, adds instances based on HTTP traffic with a maximum burst you set, without writing rules.</li>
+<li><strong>Health check</strong> pings a path on each instance and removes unhealthy instances from the load balancer.</li>
+<li><strong>ARR affinity</strong> sends a user back to the same instance with a cookie. Switch it off for stateless apps so load spreads evenly.</li>
+<li><strong>Zone redundancy</strong> is available on Premium v2 and higher, and needs at least three instances.</li>
+</ul>
+
+<h3>2. Settings and deployment</h3>
+<ul>
+<li><strong>App settings</strong> become environment variables in the app. <strong>Connection strings</strong> are similar, with a type such as SQLAzure.</li>
+<li>A setting can hold a <strong>Key Vault reference</strong> instead of the secret, in the form <code>@Microsoft.KeyVault(SecretUri=https://kv-contoso.vault.azure.net/secrets/dbpassword/)</code>. The app's managed identity needs permission to read secrets in that vault.</li>
+<li>Deployment methods: <strong>Deployment Center</strong> with GitHub Actions or Azure DevOps, ZIP deploy, a container image from ACR or Docker Hub, local Git, and FTPS, which is disabled by default for new apps.</li>
+<li>Each app also has a <strong>Kudu</strong> management site at <code>APPNAME.scm.azurewebsites.net</code>, with its own access restrictions.</li>
+</ul>
+
+<h3>3. Domains and TLS, more detail</h3>
+<ul>
+<li>You can add a <strong>wildcard</strong> domain such as <code>*.contoso.com</code> with a CNAME record.</li>
+<li>When you are moving a live domain to App Service, add the <strong>TXT asuid</strong> record first and verify, then change the CNAME or A record. Users see no interruption.</li>
+<li>If the app's inbound IP address changes, for example after some scaling operations or deleting all apps in a region and plan, the root domain's A record must be updated. A CNAME follows automatically.</li>
+<li>The <strong>App Service managed certificate</strong> needs the custom domain already mapped and verified, and the domain must be publicly reachable for validation.</li>
+<li>Certificates imported from <strong>Key Vault</strong> are synchronised when the certificate is renewed in the vault.</li>
+<li><strong>Minimum inbound TLS version</strong> is 1.2 by default for new apps. <strong>Client certificates</strong> can be required for mutual TLS.</li>
+</ul>
+
+<h3>4. Backup mechanics</h3>
+<ul>
+<li>A backup contains the app's <strong>files</strong>, its <strong>configuration</strong> and, for custom backups, a linked database.</li>
+<li>A file named <code>_backup.filter</code> in the app lets you exclude folders from custom backups, such as large logs.</li>
+<li>You can restore to the same app, to another existing app, to a deployment slot, or to a new app.</li>
+<li>If the storage account for custom backups is behind a firewall, the app must be able to reach it, for example through virtual network integration.</li>
+</ul>
+
+<h3>5. Networking edge cases</h3>
+<ul>
+<li>An app has a set of <strong>outbound IP addresses</strong>, listed in its properties, that partners can allow in their firewalls. They can change if you scale between some tiers.</li>
+<li>For a single fixed outbound address, use <strong>virtual network integration</strong> with <strong>route all</strong> traffic through the virtual network and a <strong>NAT gateway</strong> on the integration subnet.</li>
+<li>Access restrictions can allow a <strong>subnet</strong> through a service endpoint for Microsoft.Web, or a <strong>service tag</strong> such as AzureFrontDoor.Backend.</li>
+<li>The integration subnet must be <strong>delegated</strong> to Microsoft.Web/serverFarms and should be large enough for scaling, at least /26 recommended, because each instance uses addresses.</li>
+<li>A private endpoint disables public access to the app by default. Users then need DNS that resolves the app name to the private address, through a privatelink.azurewebsites.net zone.</li>
+</ul>
+
+<h3>6. What happens during a swap</h3>
+<ol>
+<li>App Service applies the <strong>target slot's</strong> slot-specific settings, such as the production connection string, to the source slot's instances. This restarts them.</li>
+<li>It waits for the instances to start and <strong>warms them up</strong> by sending requests, optionally to paths you define with application initialisation.</li>
+<li>If all instances are healthy, it <strong>switches the routing</strong>: the source slot's instances now receive production traffic.</li>
+<li>The previous production content, now in the source slot, gets the source slot's settings.</li>
+</ol>
+<ul>
+<li>If any step fails, the swap is cancelled and production is untouched.</li>
+<li><strong>Auto swap</strong> is not supported for Linux apps and Web App for Containers. Use a pipeline step for them.</li>
+<li>Slots have their own <strong>managed identities</strong>, so give each slot's identity the access it needs.</li>
+<li>A slot can be <strong>cloned</strong> from production when created, copying its settings, which saves configuration time.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -3098,7 +4016,7 @@ LESSONS.push({
   id: "az-13", n: 13, fase: 4, codigo: "VNets and routing",
   titulo: "Virtual networks, peering and routing",
   sub: "Plan address spaces and subnets, connect networks with peering, control the path of traffic with route tables and find out why a packet does not arrive.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Azure virtual networking basics. VNet address space (RFC 1918), subnets, five reserved addresses per subnet, smallest subnet /29, special subnets (GatewaySubnet, AzureBastionSubnet, AzureFirewallSubnet). Private IP allocation dynamic or static. Public IP addresses: Standard SKU (static, zone-redundant, closed by default), Basic SKU retired 30 September 2025, IPv4 and IPv6, public IP prefixes. Default outbound access ending: VNets created after 31 March 2026 have private subnets by default; explicit outbound with NAT gateway, load balancer outbound rules or public IP. VNet peering: regional and global, non-transitive, no overlapping address spaces, settings allow forwarded traffic, gateway transit and use remote gateways, peering status. System routes, user-defined routes, route tables, next hop types, longest prefix match, IP forwarding for NVAs, effective routes. Troubleshooting with Network Watcher: IP flow verify, next hop, connection troubleshoot. Official Labs 04 and 05.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -3204,7 +4122,84 @@ az network vnet peering create --resource-group rg1 --name hub-to-spoke --vnet-n
 az network route-table create --resource-group rg1 --name rt-spoke
 az network route-table route create --resource-group rg1 --route-table-name rt-spoke --name to-internet --address-prefix 0.0.0.0/0 --next-hop-type VirtualAppliance --next-hop-ip-address 10.0.1.4
 az network vnet subnet update --resource-group rg1 --vnet-name vnet-spoke --name app --route-table rt-spoke
-az network nic show-effective-route-table --resource-group rg1 --name vm1-nic --output table</pre></div>
+az network nic show-effective-route-table --resource-group rg1 --name vm1-nic --output table</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds a full addressing plan, the default routing table, how networks reach on premises, more about public IPs and NAT, and a step-by-step troubleshooting method.</p>
+
+<h3>1. A worked addressing plan</h3>
+<div class="tabla"><table>
+<thead><tr><th>Network or subnet</th><th>Prefix</th><th>Why that size</th></tr></thead>
+<tbody>
+<tr><td>vnet-hub</td><td>10.0.0.0/16</td><td>Room to grow</td></tr>
+<tr><td>GatewaySubnet</td><td>10.0.0.0/27</td><td>/27 or larger is recommended for VPN and ExpressRoute gateways</td></tr>
+<tr><td>AzureFirewallSubnet</td><td>10.0.0.64/26</td><td>Azure Firewall requires /26</td></tr>
+<tr><td>AzureBastionSubnet</td><td>10.0.0.128/26</td><td>Bastion requires /26 or larger</td></tr>
+<tr><td>snet-shared</td><td>10.0.1.0/24</td><td>Domain controllers, DNS servers</td></tr>
+<tr><td>vnet-spoke-prod</td><td>10.1.0.0/16</td><td>Does not overlap the hub or on premises</td></tr>
+<tr><td>vnet-spoke-dev</td><td>10.2.0.0/16</td><td>Same reason</td></tr>
+<tr><td>On-premises</td><td>192.168.0.0/16</td><td>Already in use, so Azure avoids it</td></tr>
+</tbody></table></div>
+<ul>
+<li>Leave free space in each address space. Adding a subnet later is easy; renumbering a busy one is not.</li>
+<li>You can add or resize the address space of a peered network. The peering must then be <strong>synchronised</strong> so the other side learns the new prefix.</li>
+<li>A network interface keeps its private IP when the VM is deallocated. Static assignment matters when you must choose the exact address.</li>
+</ul>
+
+<h3>2. The default routes of every subnet</h3>
+<div class="tabla"><table>
+<thead><tr><th>Prefix</th><th>Next hop</th><th>Comment</th></tr></thead>
+<tbody>
+<tr><td>The network's own address spaces</td><td>Virtual network</td><td>Traffic stays inside</td></tr>
+<tr><td>0.0.0.0/0</td><td>Internet</td><td>Unless overridden, or the subnet is private</td></tr>
+<tr><td>10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10</td><td>None</td><td>Dropped unless they belong to your network or a peering. These routes stop private traffic leaking to the internet</td></tr>
+<tr><td>Peered network prefixes</td><td>VNet peering</td><td>Added by each peering</td></tr>
+<tr><td>On-premises prefixes</td><td>Virtual network gateway</td><td>Added by the VPN or ExpressRoute gateway, through BGP or local network gateway settings</td></tr>
+</tbody></table></div>
+<p>A route table has the setting <strong>Propagate gateway routes</strong>. Switch it off on a subnet when you want that subnet to ignore routes learnt from the gateway, for example to force on-premises traffic through a firewall.</p>
+
+<h3>3. Reaching on premises</h3>
+<div class="tabla"><table>
+<thead><tr><th>Option</th><th>How</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td><strong>Site-to-site VPN</strong></td><td>IPsec over the internet between a VPN gateway in GatewaySubnet and your office router, described in Azure by a <strong>local network gateway</strong></td><td>Offices, moderate bandwidth</td></tr>
+<tr><td><strong>Point-to-site VPN</strong></td><td>Individual computers connect to the VPN gateway</td><td>Remote administrators</td></tr>
+<tr><td><strong>ExpressRoute</strong></td><td>A private circuit through a connectivity provider, not over the internet</td><td>High bandwidth, predictable latency</td></tr>
+<tr><td><strong>VNet-to-VNet VPN</strong></td><td>Two VPN gateways connected</td><td>Rare now: peering is simpler, faster and cheaper</td></tr>
+</tbody></table></div>
+<p>Gateways are not in the AZ-104 outline in depth, but they appear in hub-and-spoke questions through <em>gateway transit</em>.</p>
+
+<h3>4. Public IPs and NAT gateway, more detail</h3>
+<ul>
+<li>A public IP can have a <strong>DNS name label</strong>, giving a name like <code>myapp.westeurope.cloudapp.azure.com</code>.</li>
+<li>Standard public IPs can be IPv4 or IPv6. A network can be <strong>dual-stack</strong>, with both kinds of subnet prefix.</li>
+<li><strong>Routing preference</strong> chooses whether traffic enters and leaves through the Microsoft network as close as possible to the user, or through the internet, which is cheaper.</li>
+<li>A <strong>NAT gateway</strong> can use up to 16 public IP addresses or prefixes, is associated with subnets, and is placed in one zone or none.</li>
+<li>When a subnet has a NAT gateway, <strong>outbound</strong> connections use it, taking precedence over load balancer outbound rules and VM public IPs. <strong>Inbound</strong> connections to a VM's public IP still work and replies leave through that IP.</li>
+<li>NAT gateway provides many ports for outbound connections, which avoids the <strong>SNAT port exhaustion</strong> that can affect load balancer outbound traffic.</li>
+</ul>
+
+<h3>5. Troubleshooting, step by step</h3>
+<p>"VM-A at 10.1.0.4 cannot reach VM-B at 10.2.0.5 on TCP 443."</p>
+<ol>
+<li><strong>Are the networks connected?</strong> Check the peering status on both sides: Connected, not Initiated or Disconnected. If they are spokes, remember peering is not transitive.</li>
+<li><strong>Which path?</strong> Run <strong>Next hop</strong> from VM-A to 10.2.0.5. If it says None, a route drops it. If it says VirtualAppliance, the appliance must forward and allow it.</li>
+<li><strong>Which filter?</strong> Run <strong>IP flow verify</strong> outbound from VM-A and inbound to VM-B on 443. It names the rule that allows or denies. Check <strong>effective security rules</strong> on both network interfaces.</li>
+<li><strong>Is anything listening?</strong> Use <strong>Run command</strong> on VM-B to check the service and the guest firewall. Azure tools see only Azure's layers.</li>
+<li><strong>End to end.</strong> Run <strong>Connection troubleshoot</strong> from VM-A to VM-B on 443 to confirm.</li>
+</ol>
+<div class="tabla"><pre>az network watcher show-next-hop --resource-group rg1 --vm vm-a --source-ip 10.1.0.4 --dest-ip 10.2.0.5
+az network watcher test-ip-flow --resource-group rg1 --vm vm-b --direction Inbound --protocol TCP --local 10.2.0.5:443 --remote 10.1.0.4:50000
+az network watcher test-connectivity --resource-group rg1 --source-resource vm-a --dest-address 10.2.0.5 --dest-port 443
+az network vnet peering list --resource-group rg1 --vnet-name vnet-spoke-prod --output table</pre></div>
+
+<h3>6. Limits worth recognising</h3>
+<ul>
+<li>A virtual network can have up to 500 peerings by default, and many more subnets than you will need.</li>
+<li>A subnet can have one route table and one network security group.</li>
+<li>A virtual network belongs to one region. Connecting regions is done with global peering or gateways.</li>
+<li>Moving a VM to another virtual network means recreating its network interface. Moving a network interface between subnets of the same network is possible by changing its IP configuration.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -3363,7 +4358,7 @@ LESSONS.push({
   id: "az-14", n: 14, fase: 4, codigo: "Network security",
   titulo: "Securing virtual networks",
   sub: "Filter traffic with network security groups, group servers with application security groups, reach VMs safely with Bastion, and reach PaaS services privately.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Network security for AZ-104. Network security groups: rules with priority 100 to 4096, source and destination (IP, service tag, application security group), port, protocol, allow or deny; default rules at 65000, 65001 and 65500; association with subnets and NICs and the order of evaluation (inbound subnet then NIC, outbound NIC then subnet); stateful; effective security rules; IP flow verify. Service tags such as Internet, VirtualNetwork, AzureLoadBalancer, Storage, Sql. Application security groups. Azure Bastion: AzureBastionSubnet /26 or larger, Standard static public IP, SKUs Developer, Basic, Standard, Premium, native client, shareable links, session recording. Service endpoints versus private endpoints, private DNS zones privatelink, service endpoint policies. Azure Firewall mentioned briefly. Official Labs 04 and 07.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -3461,7 +4456,77 @@ az network nsg rule create --resource-group rg1 --nsg-name nsg-web --name allow-
 az network asg create --resource-group rg1 --name asg-web
 az network nic ip-config update --resource-group rg1 --nic-name vm1-nic --name ipconfig1 --application-security-groups asg-web
 az network vnet subnet update --resource-group rg1 --vnet-name vnet1 --name web --network-security-group nsg-web --service-endpoints Microsoft.Storage
-az network nic list-effective-nsg --resource-group rg1 --name vm1-nic</pre></div>
+az network nic list-effective-nsg --resource-group rg1 --name vm1-nic</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds how rules are evaluated in less obvious cases, the extra requirements of Bastion, how private endpoint DNS really works, and where Azure Firewall and other protection services fit.</p>
+
+<h3>1. Rules, the less obvious cases</h3>
+<ul>
+<li><strong>Augmented rules</strong> allow several IP ranges, ports and service tags in one rule, which keeps rule sets short.</li>
+<li>A subnet network security group also filters traffic <strong>between VMs in the same subnet</strong>. A deny rule can isolate them from each other.</li>
+<li>Platform traffic to <strong>168.63.129.16</strong>, used for DHCP, Azure DNS and VM health, is not filtered by network security groups.</li>
+<li>Changing a rule affects <strong>new</strong> connections. Existing allowed flows can continue until they end.</li>
+<li>A network security group can hold up to 1,000 rules. A rule that uses an application security group requires all its members in the same virtual network as the network interfaces being filtered.</li>
+<li>With <strong>Azure Virtual Network Manager</strong>, a central team can define <strong>security admin rules</strong> that are evaluated <em>before</em> network security groups, to enforce organisation-wide rules.</li>
+</ul>
+
+<h3>2. Diagnosing a block</h3>
+<div class="tabla"><table>
+<thead><tr><th>Tool</th><th>Use it for</th></tr></thead>
+<tbody>
+<tr><td>Effective security rules</td><td>See the merged rules on one network interface</td></tr>
+<tr><td>IP flow verify</td><td>Test one packet and get the deciding rule</td></tr>
+<tr><td>NSG diagnostics</td><td>Test a flow against all the network security groups on the path, including at subnet and interface level</td></tr>
+<tr><td>Virtual network flow logs</td><td>See what actually happened over time, allowed and denied</td></tr>
+</tbody></table></div>
+
+<h3>3. Bastion requirements in more detail</h3>
+<ul>
+<li>Users connect to Bastion on <strong>TCP 443</strong>. Bastion connects to VMs on 3389 or 22, or custom ports with Standard and higher.</li>
+<li>If you put a network security group on <code>AzureBastionSubnet</code>, it must contain the specific inbound and outbound rules Microsoft documents, such as inbound 443 from Internet and from GatewayManager, and outbound to the virtual network on 22 and 3389. Otherwise Bastion stops working.</li>
+<li>Bastion reaches VMs in <strong>peered</strong> networks, so one Bastion in the hub serves all spokes.</li>
+<li>With the <strong>native client</strong> feature, administrators connect from their own tools:</li>
+</ul>
+<div class="tabla"><pre>az network bastion ssh --name bas-hub --resource-group rg-hub --target-resource-id VM_ID --auth-type AAD
+az network bastion rdp --name bas-hub --resource-group rg-hub --target-resource-id VM_ID</pre></div>
+<ul>
+<li><strong>Shareable links</strong> let someone without portal access connect to one VM through a link. <strong>IP-based connection</strong> reaches machines by private IP, including on premises over a VPN.</li>
+<li>The Developer SKU is free and needs no subnet or public IP, but it serves one connection at a time, no peered networks, and is not for production.</li>
+</ul>
+
+<h3>4. Private endpoint DNS, how it really works</h3>
+<p>When you create a private endpoint for <code>stcontoso</code>, Azure changes the public DNS answer to a <strong>CNAME</strong>:</p>
+<div class="tabla"><pre>stcontoso.blob.core.windows.net
+   CNAME stcontoso.privatelink.blob.core.windows.net
+      inside your network (private DNS zone):   A 10.0.1.5
+      on the internet (public DNS):             the public address, which then refuses access</pre></div>
+<ul>
+<li>Clients always use the normal name. Which address they get depends on where they resolve it. That is why applications need no change.</li>
+<li>VMs in a network linked to the <code>privatelink.blob.core.windows.net</code> private zone get 10.0.1.5.</li>
+<li><strong>On premises</strong>, your DNS servers must forward that zone to Azure. The managed way is <strong>Azure DNS Private Resolver</strong> with an <strong>inbound endpoint</strong> in the hub; the older way is a DNS forwarder VM. Both end up asking Azure DNS, which knows the private zone.</li>
+<li>Each sub-resource has its own zone: <code>privatelink.blob...</code>, <code>privatelink.file...</code>, <code>privatelink.database.windows.net</code> for SQL, <code>privatelink.vaultcore.azure.net</code> for Key Vault.</li>
+<li>Network security groups and route tables do not apply to private endpoints unless you enable <strong>network policies for private endpoints</strong> on the subnet.</li>
+<li><strong>Private Link service</strong> is the other side: it lets you publish your own application behind a load balancer so customers can reach it through their own private endpoints.</li>
+</ul>
+
+<h3>5. Service endpoints, more detail</h3>
+<ul>
+<li>After enabling, traffic from the subnet to the service uses the VM's <strong>private</strong> address as source. Service firewalls that allowed the VM's public IP will stop matching: add a virtual network rule instead.</li>
+<li>Enabling a service endpoint on a subnet briefly interrupts existing connections to that service.</li>
+<li>The service firewall rule and the subnet setting are both needed. The subnet setting alone opens nothing.</li>
+<li><strong>Service endpoint policies</strong> are available for Azure Storage, to restrict which accounts the subnet can reach.</li>
+</ul>
+
+<h3>6. Other protection services, in one table</h3>
+<div class="tabla"><table>
+<thead><tr><th>Service</th><th>Protects</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Network security group</td><td>Subnets and interfaces, layers 3 and 4</td><td>Free, distributed</td></tr>
+<tr><td>Azure Firewall</td><td>Traffic between networks and to the internet, layers 3 to 7</td><td>Basic, Standard and Premium SKUs. Rules processed as DNAT, then network, then application. Needs routes to send traffic to it</td></tr>
+<tr><td>Web Application Firewall</td><td>Web apps against attacks such as SQL injection</td><td>On Application Gateway or Front Door. Detection or Prevention mode</td></tr>
+<tr><td>Azure DDoS Protection</td><td>Public IPs against volumetric attacks</td><td>Network protection for a whole network, or IP protection per address. Basic protection is always on</td></tr>
+</tbody></table></div>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -3627,7 +4692,7 @@ LESSONS.push({
   id: "az-15", n: 15, fase: 4, codigo: "DNS and load balancing",
   titulo: "Azure DNS and load balancing",
   sub: "Host public and private DNS zones in Azure, then distribute traffic with a public or internal load balancer and find out why it does not.",
-  horas: "4 hours",
+  horas: "5 hours",
   contexto: "Azure DNS: public zones, delegation with NS records at the registrar, record sets, alias records (apex to public IP, Traffic Manager, Front Door), TTL. Private DNS zones: virtual network links, auto-registration, one auto-registration zone per VNet, Azure-provided DNS 168.63.129.16, custom DNS servers on the VNet. Azure Load Balancer: layer 4, Standard SKU (Basic retired 30 September 2025), public and internal, frontend IP, backend pool, health probes (TCP, HTTP, HTTPS), load-balancing rules, inbound NAT rules, outbound rules, session persistence (none, client IP, client IP and protocol), HA ports, secure by default with NSG. Troubleshooting probes and NSGs. Comparison with Application Gateway, Traffic Manager and Front Door. Official Lab 06.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -3713,7 +4778,87 @@ nslookup www.contoso.com ns1-01.azure-dns.com</pre></div>
 <div class="tabla"><pre>az network lb create --resource-group rg1 --name lb-web --sku Standard --public-ip-address pip-lb --frontend-ip-name fe --backend-pool-name be
 az network lb probe create --resource-group rg1 --lb-name lb-web --name http-probe --protocol Http --port 80 --path /
 az network lb rule create --resource-group rg1 --lb-name lb-web --name http --protocol Tcp --frontend-port 80 --backend-port 80 --frontend-ip-name fe --backend-pool-name be --probe-name http-probe
-az network nic ip-config address-pool add --resource-group rg1 --nic-name vm1-nic --ip-config-name ipconfig1 --lb-name lb-web --address-pool be</pre></div>
+az network nic ip-config address-pool add --resource-group rg1 --nic-name vm1-nic --ip-config-name ipconfig1 --lb-name lb-web --address-pool be</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds the DNS details behind delegation and hybrid resolution, more load balancer settings, a clear picture of Application Gateway, Traffic Manager routing methods, and a troubleshooting checklist with the right metrics.</p>
+
+<h3>1. DNS details</h3>
+<ul>
+<li>Every zone has an <strong>SOA</strong> record and an <strong>NS</strong> record set at the apex, created by Azure.</li>
+<li>To check a delegation, run <code>nslookup -type=NS contoso.com</code>. If the answer does not list the Azure name servers, the registrar is not updated yet. Changes can take up to the TTL of the old records to be seen everywhere.</li>
+<li>A lower <strong>TTL</strong> makes changes visible sooner but generates more queries. Lower it before a planned change and raise it afterwards.</li>
+<li>Azure DNS supports <strong>DNSSEC</strong> signing for public zones.</li>
+<li>Records for <strong>email</strong>: MX for the mail server, TXT for SPF and domain verification. CAA limits which certificate authorities can issue certificates for the domain.</li>
+<li>Locks are a good idea on DNS zones: deleting a zone by mistake takes the whole domain offline.</li>
+</ul>
+<div class="tabla"><pre>az network dns record-set cname set-record --resource-group rg1 --zone-name contoso.com --record-set-name www --cname contoso-web.azurewebsites.net
+az network dns record-set txt add-record --resource-group rg1 --zone-name contoso.com --record-set-name asuid.www --value VERIFICATION_ID
+az network dns record-set a create --resource-group rg1 --zone-name contoso.com --name "@" --target-resource PUBLIC_IP_ID</pre></div>
+
+<h3>2. Hybrid name resolution</h3>
+<div class="tabla"><table>
+<thead><tr><th>Who asks</th><th>For what</th><th>Solution</th></tr></thead>
+<tbody>
+<tr><td>Azure VMs</td><td>Names in a private zone</td><td>Link the zone to their network</td></tr>
+<tr><td>On-premises servers</td><td>Names in Azure private zones</td><td>Conditional forwarders on premises pointing to the <strong>inbound endpoint</strong> of Azure DNS Private Resolver</td></tr>
+<tr><td>Azure VMs</td><td>Names in the on-premises domain</td><td>A <strong>forwarding ruleset</strong> on the resolver's <strong>outbound endpoint</strong>, linked to the network, sending that domain to on-premises DNS servers</td></tr>
+</tbody></table></div>
+<p>Before the resolver existed, the same was done with DNS server VMs in Azure. Questions may show either.</p>
+
+<h3>3. Load balancer settings, more detail</h3>
+<ul>
+<li>A load balancer can have several <strong>frontend IPs</strong>, each with its own rules, to publish several services on port 443.</li>
+<li><strong>Backend pools</strong> can be defined by network interface or by IP address. All backends must be in one virtual network.</li>
+<li><strong>Health probe</strong> settings: protocol, port, path for HTTP or HTTPS, and interval. A backend is taken out after consecutive failures and put back after it answers again.</li>
+<li><strong>Idle timeout</strong> for TCP flows defaults to 4 minutes and can be raised. <strong>TCP reset</strong> tells both ends when a flow times out instead of dropping it silently.</li>
+<li><strong>Floating IP</strong> keeps the frontend address as the destination seen by the backend. It is needed for some clustering scenarios, such as SQL Server Always On listeners.</li>
+<li><strong>Outbound rules</strong> define how backends reach the internet through the frontend IPs and how many SNAT ports each gets. For heavy outbound traffic, a NAT gateway is the better tool.</li>
+<li>A <strong>cross-region load balancer</strong>, the global tier, places one global address in front of regional Standard load balancers for layer 4 failover between regions.</li>
+<li>A <strong>Gateway Load Balancer</strong> inserts third-party appliances, such as firewalls, transparently in the path. It is a specialised SKU you only need to recognise.</li>
+</ul>
+
+<h3>4. Application Gateway, the parts</h3>
+<div class="tabla"><table>
+<thead><tr><th>Part</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>Frontend IP</td><td>Public, private, or both</td></tr>
+<tr><td>Listener</td><td>Protocol, port, host name and certificate. Basic listeners serve one site; multi-site listeners route by host name</td></tr>
+<tr><td>Routing rule</td><td>Links a listener to backends. Basic rules send everything to one pool; path-based rules send /images/* to one pool and /api/* to another</td></tr>
+<tr><td>Backend settings</td><td>Port, protocol, cookie affinity, timeout, probe</td></tr>
+<tr><td>Backend pool</td><td>VMs, scale sets, IP addresses, FQDNs, App Service apps</td></tr>
+</tbody></table></div>
+<ul>
+<li>It needs a <strong>dedicated subnet</strong>. The v2 SKU autoscales and supports zones.</li>
+<li>It can terminate TLS, and re-encrypt to the backend for <strong>end-to-end TLS</strong>.</li>
+<li>With the WAF SKU it filters web attacks.</li>
+</ul>
+
+<h3>5. Traffic Manager routing methods</h3>
+<div class="tabla"><table>
+<thead><tr><th>Method</th><th>Sends users to</th></tr></thead>
+<tbody>
+<tr><td>Priority</td><td>The primary endpoint, and a backup only if the primary is unhealthy</td></tr>
+<tr><td>Weighted</td><td>Endpoints in proportion to weights, for gradual migrations</td></tr>
+<tr><td>Performance</td><td>The endpoint with the lowest network latency for the user</td></tr>
+<tr><td>Geographic</td><td>An endpoint chosen by the user's country or region, for data sovereignty</td></tr>
+<tr><td>Multivalue</td><td>Several healthy addresses in one answer</td></tr>
+<tr><td>Subnet</td><td>An endpoint chosen by the user's source IP range</td></tr>
+</tbody></table></div>
+<p>Because Traffic Manager works by DNS, the client connects directly to the endpoint afterwards. Failover speed depends on the DNS TTL and probe settings.</p>
+
+<h3>6. Troubleshooting checklist</h3>
+<div class="tabla"><table>
+<thead><tr><th>Symptom</th><th>Check</th></tr></thead>
+<tbody>
+<tr><td>Health Probe Status metric is 0 for all backends</td><td>NSG blocks AzureLoadBalancer, wrong probe port or path, service not listening, guest firewall</td></tr>
+<tr><td>Probes healthy, clients time out</td><td>No NSG rule allows client traffic, wrong backend port in the rule, Standard LB secure by default</td></tr>
+<tr><td>Data Path Availability metric low</td><td>A problem in the frontend path or the Azure platform. Check Resource health</td></tr>
+<tr><td>Backends cannot reach the internet</td><td>No outbound rule, NAT gateway or public IP. SNAT port exhaustion under load</td></tr>
+<tr><td>One backend gets all traffic</td><td>Session persistence set to Client IP, or few clients behind one NAT address</td></tr>
+<tr><td>A VM cannot be added to the pool</td><td>It is in another virtual network, or its public IP SKU does not match</td></tr>
+</tbody></table></div>
+<p>The load balancer's <strong>Insights</strong> page shows a topology diagram, probe status per backend and these metrics on one screen.</p>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -3873,7 +5018,7 @@ LESSONS.push({
   id: "az-16", n: 16, fase: 5, codigo: "Azure Monitor",
   titulo: "Azure Monitor: metrics, logs and alerts",
   sub: "Collect what your resources report, query it with KQL, raise alerts that reach the right people, and use Insights and Network Watcher to see inside.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Azure Monitor for AZ-104. Data types: metrics (numeric time series, platform metrics kept 93 days), logs (Log Analytics workspace, KQL), activity log (control plane, 90 days), resource logs (need diagnostic settings). Diagnostic settings destinations: Log Analytics, storage account, Event Hubs, partner solutions. Azure Monitor Agent and data collection rules for guest OS data. KQL operators: where, project, extend, summarize, count, bin, ago, order by, take, render; tables Heartbeat, Perf, Event, Syslog, AzureActivity, AzureDiagnostics. Alerts: rule (scope, condition, actions, severity 0 to 4), signal types metric, log search, activity log, resource health, service health; action groups (notifications and actions); alert processing rules (suppress or add action groups); alert states. Insights: VM insights, Storage insights, Network insights. Network Watcher: Connection monitor, VNet flow logs (NSG flow logs retire 30 September 2027), traffic analytics, the diagnostic tools. Official Lab 11.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -3999,7 +5144,92 @@ Event
 <div class="tabla"><pre>az monitor metrics list --resource VM_ID --metric "Percentage CPU" --interval PT5M
 az monitor diagnostic-settings create --name to-law --resource STORAGE_BLOB_SERVICE_ID --workspace WORKSPACE_ID --logs "[{category:StorageRead,enabled:true}]"
 az monitor action-group create --resource-group rg1 --name ag-ops --short-name ops --action email admin admin@contoso.com
-az monitor metrics alert create --resource-group rg1 --name cpu-high --scopes VM_ID --condition "avg Percentage CPU > 85" --window-size 15m --evaluation-frequency 5m --severity 2 --action ag-ops</pre></div>
+az monitor metrics alert create --resource-group rg1 --name cpu-high --scopes VM_ID --condition "avg Percentage CPU > 85" --window-size 15m --evaluation-frequency 5m --severity 2 --action ag-ops</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds how to read metrics charts properly, how workspaces and data collection are designed, more KQL, the fine print of alerts and action groups, and the setup behind Network Watcher monitoring.</p>
+
+<h3>1. Reading metrics properly</h3>
+<ul>
+<li>Every chart has an <strong>aggregation</strong>: Average, Minimum, Maximum, Sum or Count. Average CPU can hide short peaks that Maximum shows. Network bytes usually make sense as Sum.</li>
+<li>The <strong>time granularity</strong>, such as 1 minute or 1 hour, is the bucket size. A long time range with fine granularity is not possible, so Azure adjusts it.</li>
+<li><strong>Splitting</strong> draws one line per value of a dimension, for example one line per VM instance or per storage API name. <strong>Filtering</strong> keeps only some values.</li>
+<li>One chart can show the same metric for several resources of the same type in one region.</li>
+<li>Charts can be pinned to a <strong>dashboard</strong> or added to a <strong>workbook</strong>, and you can create an alert directly from a chart.</li>
+</ul>
+
+<h3>2. Workspaces and data collection</h3>
+<ul>
+<li>Many organisations use <strong>one central workspace</strong> per region or per environment. Fewer workspaces make cross-resource queries easier.</li>
+<li><strong>Retention</strong>: data is kept for interactive queries for a default period, configurable up to two years, and can be kept longer in a cheaper <strong>long-term retention</strong> state, up to twelve years.</li>
+<li>Tables can use different <strong>plans</strong>: Analytics for full queries and alerts, and cheaper plans for verbose logs that are queried rarely.</li>
+<li>A <strong>daily cap</strong> stops ingestion after a volume per day, to protect the budget. Use it with care: data is lost after the cap.</li>
+<li>A <strong>data collection rule</strong> defines <em>what</em> to collect from VMs (performance counters, Windows event logs by level, Linux syslog facilities and severities) and <em>where</em> to send it. You associate it with VMs, which then get the Azure Monitor Agent.</li>
+<li>The old Log Analytics agent was retired in 2024. Questions about new deployments expect the Azure Monitor Agent.</li>
+</ul>
+
+<h3>3. More KQL</h3>
+<div class="tabla"><pre>// A threshold as a variable
+let threshold = 90;
+Perf
+| where CounterName == "% Processor Time" and TimeGenerated > ago(30m)
+| summarize MaxCPU = max(CounterValue) by Computer
+| where MaxCPU > threshold
+
+// Combine two tables
+Heartbeat
+| summarize LastSeen = max(TimeGenerated) by Computer
+| join kind=inner (
+    Perf
+    | where CounterName == "Available MBytes"
+    | summarize FreeMB = avg(CounterValue) by Computer
+  ) on Computer
+| project Computer, LastSeen, FreeMB
+
+// Search several tables for a word
+search "disk full"
+| where TimeGenerated > ago(1d)
+
+// Count failed sign-ins per user (needs Entra logs in the workspace)
+SigninLogs
+| where ResultType != "0"
+| summarize Failures = count() by UserPrincipalName
+| order by Failures desc</pre></div>
+<ul>
+<li><code>let</code> defines a value or subquery. <code>join</code> combines tables on a column. <code>union</code> stacks tables. <code>search</code> looks for text anywhere, slowly.</li>
+<li>Comparison is <code>==</code> for exact, <code>contains</code> or <code>has</code> for text, <code>!=</code> for not equal. String comparison with <code>==</code> is case sensitive; <code>=~</code> is not.</li>
+</ul>
+
+<h3>4. Alerts, the fine print</h3>
+<ul>
+<li>A <strong>log search alert</strong> runs its query at a <strong>frequency</strong> over a <strong>time window</strong>, and fires when the result crosses a threshold a number of times. It can split by a dimension, such as Computer, to create one alert per machine.</li>
+<li>A metric alert can watch <strong>many resources</strong> of the same type in one region with one rule, for example all VMs in a subscription.</li>
+<li>Alerts can <strong>auto-resolve</strong> when the condition clears. Log search alerts can be configured to do so.</li>
+<li>Action groups have <strong>rate limits</strong>: for example, no more than one SMS or voice call every five minutes to the same number, and a cap on emails per hour. During storms some notifications are suppressed.</li>
+<li>The <strong>common alert schema</strong> gives webhooks and Logic Apps the same payload format for every alert type, which simplifies automation.</li>
+<li>Alert processing rules can be scheduled <em>always</em>, <em>once between two dates</em>, or <em>recurring</em> daily, weekly or monthly.</li>
+</ul>
+
+<h3>5. Network Watcher setup</h3>
+<ul>
+<li>Network Watcher is a regional resource, created automatically in a resource group named <code>NetworkWatcherRG</code> as <code>NetworkWatcher_REGION</code>.</li>
+<li><strong>Packet capture</strong> needs the Network Watcher agent extension on the VM and saves captures to a storage account or the VM's disk, with filters and a time limit.</li>
+<li><strong>Virtual network flow logs</strong> are written to a storage account, with a retention period. <strong>Traffic analytics</strong> processes them into a workspace every 10 or 60 minutes.</li>
+<li><strong>Connection monitor</strong> uses <em>test groups</em>: sources (Azure VMs or scale sets with the agent, on-premises machines with the Azure Monitor Agent), destinations (VMs, addresses, URLs), and <em>test configurations</em> (TCP, HTTP or ICMP, frequency, and success thresholds for failed checks and round-trip time). Results go to a workspace and can trigger alerts.</li>
+</ul>
+
+<h3>6. Choosing the monitoring tool</h3>
+<div class="tabla"><table>
+<thead><tr><th>Need</th><th>Tool</th></tr></thead>
+<tbody>
+<tr><td>Is Azure itself having a problem in my regions?</td><td>Service Health</td></tr>
+<tr><td>Is this specific resource available?</td><td>Resource Health</td></tr>
+<tr><td>Who changed or deleted something?</td><td>Activity log</td></tr>
+<tr><td>How busy is it right now, and over the last weeks?</td><td>Metrics</td></tr>
+<tr><td>Detailed events, searchable, across resources</td><td>Logs in a workspace with KQL</td></tr>
+<tr><td>Improve cost, security, reliability</td><td>Azure Advisor</td></tr>
+<tr><td>A shared report mixing charts and text</td><td>Workbooks</td></tr>
+</tbody></table></div>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
@@ -4170,7 +5400,7 @@ LESSONS.push({
   id: "az-17", n: 17, fase: 5, codigo: "Backup and recovery",
   titulo: "Backup and disaster recovery",
   sub: "Back up VMs, file shares and more with Azure Backup, restore what you need, and fail whole machines over to another region with Site Recovery.",
-  horas: "5 hours",
+  horas: "6 hours",
   contexto: "Azure Backup and Azure Site Recovery for AZ-104. Recovery Services vault (Azure VMs, SQL Server and SAP HANA in VMs, Azure Files, MARS agent for on-premises files and folders, MABS and DPM, Site Recovery) versus Backup vault (Azure Disks, Azure Blobs, Azure Database for PostgreSQL, AKS and others). Vault region must match the protected resources for VM backup. Vault storage redundancy LRS, ZRS, GRS (default), changeable only before backups exist; Cross Region Restore. Soft delete (14 days), immutable vault, multi-user authorization with Resource Guard. Backup policy: standard and enhanced, frequency, retention daily weekly monthly yearly, instant restore snapshots. Consistency types. Restore options: create VM, restore disks, replace existing, cross-region, file recovery. Azure Files backup with snapshots. Site Recovery: replication to a secondary region, replication policy, RPO and RTO, test failover, failover, commit, re-protect, failback, recovery plans. Backup reports in Business Continuity Center with diagnostic settings to Log Analytics, built-in Azure Monitor alerts for backup. Official Lab 10.",
   secciones: [
     { id: "concept", titulo: "The idea", html: R`
@@ -4271,7 +5501,79 @@ LESSONS.push({
 az backup vault backup-properties set --resource-group rg1 --name rsv-weu --backup-storage-redundancy LocallyRedundant
 az backup protection enable-for-vm --resource-group rg1 --vault-name rsv-weu --vm vm1 --policy-name DefaultPolicy
 az backup protection backup-now --resource-group rg1 --vault-name rsv-weu --container-name vm1 --item-name vm1 --backup-management-type AzureIaasVM
-az backup job list --resource-group rg1 --vault-name rsv-weu --output table</pre></div>
+az backup job list --resource-group rg1 --vault-name rsv-weu --output table</pre></div>` },
+
+    { id: "deeper", titulo: "In depth", html: R`
+<p class="lead">This part adds how a VM backup actually runs, special cases such as encrypted VMs and on-premises agents, the failover choices in Site Recovery, and how to read the reports.</p>
+
+<h3>1. How a VM backup runs</h3>
+<ol>
+<li>At the scheduled time the backup extension asks the guest to prepare: VSS on Windows, scripts if configured on Linux.</li>
+<li>A <strong>snapshot</strong> of every disk is taken. This is the only moment the guest is involved, so the VM keeps running.</li>
+<li>The snapshot is kept as an <strong>instant restore</strong> point for a few days.</li>
+<li>Changed blocks are <strong>transferred to the vault</strong>. The first backup copies everything; later ones only changes, but every recovery point can be restored on its own.</li>
+</ol>
+<ul>
+<li>Pricing has two parts: a fee per <strong>protected instance</strong>, depending on its size, and the <strong>storage</strong> used in the vault, which depends on the vault's redundancy.</li>
+<li>VMs encrypted with <strong>Azure Disk Encryption</strong> can be backed up, but the Backup service needs permission to read the keys and secrets in the Key Vault. Encryption at host and server-side encryption need nothing special.</li>
+<li>Selective disk backup can exclude some data disks to save cost.</li>
+</ul>
+
+<h3>2. Vault options, more detail</h3>
+<ul>
+<li><strong>Cross Region Restore</strong> needs GRS and must be enabled on the vault. Data in the secondary region lags behind the primary by some hours.</li>
+<li><strong>Cross Subscription Restore</strong> lets you restore VMs into another subscription of the tenant.</li>
+<li>Soft-deleted items show a state such as <em>Soft deleted</em>. To finish deleting one before the period ends, you must disable soft delete, undelete it, then delete again, unless soft delete is set to always on.</li>
+<li>Vaults support <strong>private endpoints</strong>, so backup traffic from VMs stays in your network.</li>
+<li>Roles: <strong>Backup Contributor</strong> manages backups but cannot delete the vault or grant access; <strong>Backup Operator</strong> can run backups and restores but not stop protection or delete data; <strong>Backup Reader</strong> only views.</li>
+</ul>
+
+<h3>3. Other workloads, more detail</h3>
+<ul>
+<li><strong>SQL Server in an Azure VM</strong>: Azure Backup takes full, differential and <strong>log</strong> backups, with log backups as often as every 15 minutes, giving point-in-time restore of the database.</li>
+<li><strong>MARS agent</strong>: you register the server with the vault using vault credentials and set a <strong>passphrase</strong> that encrypts the data. Microsoft does not keep it: if it is lost, the backups cannot be restored. Store it safely, for example in Key Vault.</li>
+<li>MARS runs up to three backups a day and restores to the same or another machine registered to the vault.</li>
+<li><strong>Azure Files</strong>: besides snapshots, a vaulted tier copies share data into the vault, protecting it even if the storage account is deleted.</li>
+<li><strong>Azure Disks</strong> in a Backup vault use incremental snapshots kept in a resource group you choose. The vault's managed identity needs roles on the disks and on that resource group.</li>
+</ul>
+
+<h3>4. Site Recovery, more detail</h3>
+<ul>
+<li>For Azure to Azure, the <strong>Mobility service</strong> extension is installed on each VM automatically when replication is enabled.</li>
+<li>Changes are written first to a <strong>cache storage account</strong> in the source region, then sent to managed disks in the target region.</li>
+<li><strong>Network mapping</strong> decides which target virtual network each source network fails over to. The test failover network should be different from the production target network.</li>
+<li><strong>Multi-VM consistency</strong> puts VMs in a replication group so that their recovery points are consistent with each other, for applications spread over several VMs.</li>
+<li><strong>Recovery plans</strong> can include Azure Automation runbooks, for example to update DNS or a load balancer after failover, and manual actions that pause the plan.</li>
+</ul>
+<div class="tabla"><table>
+<thead><tr><th>Recovery point at failover</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><strong>Latest</strong></td><td>Processes all data received first. Lowest data loss, slower to start</td></tr>
+<tr><td><strong>Latest processed</strong></td><td>Uses the last point already processed. Fastest, the lowest RTO</td></tr>
+<tr><td><strong>Latest app-consistent</strong></td><td>The last application-consistent point. Safer for databases, more data loss</td></tr>
+<tr><td><strong>Custom</strong></td><td>A specific earlier point, for example before corruption</td></tr>
+</tbody></table></div>
+
+<h3>5. Backup and Site Recovery compared</h3>
+<div class="tabla"><table>
+<thead><tr><th></th><th>Azure Backup</th><th>Azure Site Recovery</th></tr></thead>
+<tbody>
+<tr><td>Purpose</td><td>Restore data from the past</td><td>Keep the service running elsewhere</td></tr>
+<tr><td>Typical RPO</td><td>Hours, or 15 minutes for SQL logs</td><td>Minutes or less</td></tr>
+<tr><td>Typical RTO</td><td>Hours</td><td>Minutes</td></tr>
+<tr><td>Retention</td><td>Days to years</td><td>Hours to days of recovery points</td></tr>
+<tr><td>Protects against</td><td>Deletion, corruption, ransomware, with long history</td><td>Region or datacentre loss</td></tr>
+<tr><td>Vault location</td><td>Same region as the VMs</td><td>Target region</td></tr>
+</tbody></table></div>
+<p>A complete design uses both: Site Recovery for fast recovery from a regional outage, Backup for going back in time.</p>
+
+<h3>6. Reports and alerts in practice</h3>
+<ul>
+<li>Backup reports are a workbook in the <strong>Business Continuity Center</strong>, also reachable from Backup center. After configuring diagnostic settings, data can take up to a day to appear.</li>
+<li>Report tabs include <strong>Summary</strong>, <strong>Backup items</strong>, <strong>Usage</strong>, <strong>Jobs</strong>, <strong>Policies</strong>, <strong>Optimize</strong> (find inactive items and retention you could reduce) and <strong>Policy adherence</strong> (items without a successful backup every day).</li>
+<li>Azure Backup raises <strong>Azure Monitor alerts</strong> by default for job failures and for security events, such as deleting backup data or disabling soft delete. The older classic alerts are retired.</li>
+<li>To be notified, add an <strong>alert processing rule</strong> that sends those alerts to an action group. Metric-based alerts on backup health can also be created.</li>
+</ul>
 
 <h3>Go deeper on Microsoft Learn</h3>
 <p>Read these after the lesson for more detail and examples. The official training modules come first. The documentation articles cover the exam skills that have no training module.</p>
